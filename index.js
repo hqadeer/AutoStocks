@@ -6,8 +6,7 @@ module.exports = {
     getCurrentPrice: currentPrice,
     twoPlots: function (symbol, call) {
         function secondCall (dict1) {
-            recentData(symbol, mode = 'daily', 
-                       callback = function (dict2) {
+            recentData(symbol, {mode: daily}, function (dict2) {
                 let current = currentPrice(dict1, function () {});
                 let x1 = Object.keys(dict1);
                 let y1 = dict1.map(s => s['4. close']);
@@ -20,9 +19,9 @@ module.exports = {
                     call(current, x1, y1, x2, y2);
                 }
             })
-        console.log('got here')  
-        recentData(symbol, callback=secondCall);
         }
+        console.log('got here')
+        recentData(symbol, {}, secondCall);
     }
 }
 
@@ -40,7 +39,7 @@ function recentData(symbol, options, callback) {
         options.mode = 'intra'
     }
     if (typeof options.size === "undefined") {
-        options.size = 'compact'
+        options.size = 'full'
     }
     var func;
     if (options.mode === 'intra') {
@@ -54,6 +53,7 @@ function recentData(symbol, options, callback) {
         let base = 'https://www.alphavantage.co/query?function='
         if (options.mode === 'intra') {
             URL = base + `${func}&symbol=${symbol}&interval=${options.time}&outputsize=${options.size}&apikey=${apiKey}`;
+            console.log(URL)
         } else {
             URL = base + `${func}&symbol=${symbol}&outputsize=${options.size}&apiKey=${apiKey}`;
         }
@@ -76,14 +76,15 @@ function recentData(symbol, options, callback) {
     getURL(inner);
 }
 
-function currentPrice(symbol, callback) {
+function currentPrice(symbol, priceCallBack) {
     function findMostRecent (dict) {
+        console.log(Object.keys(dict))
         if (isEmpty(dict)) {
             let msg = symbol + ' is not a valid stock symbol.';
-            callback(msg);
+            priceCallBack(msg);
         } else {
             const comp = (a, b) => (a > b) ? dict[a]['4. close'] : dict[b]['4. close'];
-            callback(Object.keys(dict).reduce(comp));
+            priceCallBack(Object.keys(dict).reduce(comp));
         }
     }
     recentData(symbol, {}, findMostRecent);
