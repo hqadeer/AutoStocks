@@ -6,17 +6,21 @@ module.exports = {
     getCurrentPrice: currentPrice,
     twoPlots: function (symbol, call) {
         function secondCall (dict1) {
-            recentData(symbol, mode = 'daily', size='full',
+            recentData(symbol, mode = 'daily', 
                        callback = function (dict2) {
                 let current = currentPrice(dict1, function () {});
                 let x1 = Object.keys(dict1);
                 let y1 = dict1.map(s => s['4. close']);
                 let x2 = Object.keys(dict2);
                 let y2 = dict2.map(s => s['4. close']);
-                call(current, x1, y1, x2, y2);
+                if (isEmpty(dict1)) {
+                    call(current, 0, 0, 0, 0);
+                } else {
+                    call(current, x1, y1, x2, y2);
+                }
             })   
+        recentData(symbol, callback=secondCall);
         }
-        recentData(symbol, time='15min', size='full', callback=secondCall);
     }
 }
 

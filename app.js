@@ -17,6 +17,13 @@ app.post('/checkprice', function (req, res) {
      // with price displayed
 })
 
+app.post('/checkandload', function (req, res) {
+    backend.twoPlots(req.body.symbol, function (price, x1, y1, x2, y2) {
+        res.render('main', {cost: price, xIntra: x1, yIntra: y1,
+                            xDaily: x2, yDaily: y2})
+    })
+})
+
 app.get('/', function (req, res) {
     res.render('main.pug')
 })
