@@ -1,5 +1,6 @@
 html
     head
+    script(src='https://cdn.plot.ly/plotly-latest.min.js')
 body
     h1 Stocks
     form(action='checkprice', method='POST')
@@ -8,3 +9,15 @@ body
         input(type='submit')
     if cost
         p #{cost}
+    if xs && ys && !blank
+        div(id='history', style='width:600px;height:250px')
+        script.
+            TESTER = document.getElementById('history');
+            Plotly.plot( TESTER, [{
+                x: !{xs},
+                y: !{ys} }], { 
+                margin: { t: 0 } }, {showSendToCloud:false} );
+
+            /* Current Plotly.js version */
+            console.log( Plotly.BUILD );
+        

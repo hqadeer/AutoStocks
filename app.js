@@ -12,7 +12,7 @@ app.set("views", path.join(__dirname, "views"))
 
 app.post('/checkprice', function (req, res) {
     backend.getCurrentPrice(req.body.symbol, function (price) {
-        res.render('main', {cost: price})
+        res.render('main', {cost: price, data: {x: [1, 2, 3], y: [1, 2, 3]}})
     })
      // with price displayed
 })
