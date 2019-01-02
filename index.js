@@ -13,35 +13,49 @@ module.exports = {
                 let y1 = dict1.map(s => s['4. close']);
                 let x2 = Object.keys(dict2);
                 let y2 = dict2.map(s => s['4. close']);
+                console.log('here too')
                 if (isEmpty(dict1)) {
                     call(current, 0, 0, 0, 0);
                 } else {
                     call(current, x1, y1, x2, y2);
                 }
-            })   
+            })
+        console.log('got here')  
         recentData(symbol, callback=secondCall);
         }
     }
 }
 
-function recentData(symbol, time = '1min', mode = 'intra', size='full', callback = '') {
+function recentData(symbol, options, callback) {
     /* Obtains the past two hours of prices for the
        stock specified by symbol and calls callback function
        on it
     */
-   var func;
-    if (mode === 'intra') {
+
+    // Defaults
+    if (typeof options.time === "undefined") {
+        options.time = '1min'
+    }
+    if (typeof options.mode === "undefined") {
+        options.mode = 'intra'
+    }
+    if (typeof options.size === "undefined") {
+        options.size = 'compact'
+    }
+    var func;
+    if (options.mode === 'intra') {
         func = 'TIME_SERIES_INTRADAY';
     } else {
         func = 'TIME_SERIES_DAILY_ADJUSTED';
     }
+
     function getURL () {
         var URL;
         let base = 'https://www.alphavantage.co/query?function='
-        if (mode === 'intra') {
-            URL = base + `${func}&symbol=${symbol}&interval=${time}&outputsize=${size}&apikey=${apiKey}`;
+        if (options.mode === 'intra') {
+            URL = base + `${func}&symbol=${symbol}&interval=${options.time}&outputsize=${options.size}&apikey=${apiKey}`;
         } else {
-            URL = base + `${func}&symbol=${symbol}&outputsize=${size}&apiKey=${apiKey}`;
+            URL = base + `${func}&symbol=${symbol}&outputsize=${options.size}&apiKey=${apiKey}`;
         }
         inner(URL);
     }
@@ -51,7 +65,10 @@ function recentData(symbol, time = '1min', mode = 'intra', size='full', callback
                 console.log('error:', err);
             } else {
                 var stockInfo = JSON.parse(body);
-                let val = stockInfo[`Time Series (${time})`];
+                if (options.mode !== 'intra') {
+                    options.time = 'Daily'
+                }
+                let val = stockInfo[`Time Series (${options.time})`];
                 callback(val);
             }
         });
@@ -69,7 +86,7 @@ function currentPrice(symbol, callback) {
             callback(Object.keys(dict).reduce(comp));
         }
     }
-    recentData(symbol, callback = findMostRecent);
+    recentData(symbol, {}, findMostRecent);
 }
 
 function isEmpty (obj) {
