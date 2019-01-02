@@ -10,8 +10,8 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.set('view engine', 'pug')
 app.set("views", path.join(__dirname, "views"))
 
-app.get('/checkprice', function (req, res) {
-    backend.getCurrentPrice(req.query.symbol, function (price) {
+app.post('/checkprice', function (req, res) {
+    backend.getCurrentPrice(req.body.symbol, function (price) {
         res.render('main', {cost: price})
     })
      // with price displayed
@@ -24,4 +24,3 @@ app.get('/', function (req, res) {
 app.listen(4800, function () {
     console.log('example')
 })
-

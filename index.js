@@ -5,18 +5,23 @@ let apiKey = 'JWFEGK7M12L4LOT1';
 module.exports = {
     getCurrentPrice: function getCurrentPrice(symbol, callback) {
         function findMostRecent (dict) {
-            const comp = (a, b) => (a > b) ? dict[a]['4. close'] : dict[b]['4. close'];
-            callback(Object.keys(dict).reduce(comp));
+            if (isEmpty(dict)) {
+                let msg = symbol + ' is not a valid stock symbol.'
+                callback(msg)
+            } else {
+                const comp = (a, b) => (a > b) ? dict[a]['4. close'] : dict[b]['4. close']
+                callback(Object.keys(dict).reduce(comp))
+            }
         }
         recentData(symbol, findMostRecent)
     }
 }
 
 function recentData(symbol, addOn) {
-    /* Obtains the past two hours of prices for the 
-       stock specified by symbol and calls addOn function 
+    /* Obtains the past two hours of prices for the
+       stock specified by symbol and calls addOn function
        on it
-    */ 
+    */
     let func = 'TIME_SERIES_INTRADAY';
     let interval = '1min';
     function getURL () {
@@ -37,3 +42,9 @@ function recentData(symbol, addOn) {
     getURL(inner)
 }
 
+function isEmpty (obj) {
+    for (var i in obj) {
+        return false
+    }
+    return true
+}
