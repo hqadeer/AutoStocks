@@ -26,9 +26,9 @@ app.post('/checkandload', function (req, res) {
 })
 
 app.get('/', function (req, res) {
-    res.render('main.pug')
+    res.render('main.pug');
 })
 
 app.listen(4800, function () {
-    console.log('example')
+    console.log('listening on port 4800');
 })

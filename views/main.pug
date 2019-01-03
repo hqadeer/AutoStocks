@@ -5,7 +5,7 @@ html
     script(src='https://cdn.plot.ly/plotly-latest.min.js')
 body
     h1 Stocks
-    form(action='checkprice', method='POST')
+    form(action='checkandload', method='POST')
         p Symbol:
         input(type='text', name='symbol', value='')
         input(type='submit')
@@ -15,8 +15,8 @@ body
         div(id='recent', style='width:600px;height:250px')
         script.
             var data = [{
-                x: !{xIntra}
-                y: !{yIntra}
+                x: [!{xIntra}],
+                y: [!{yIntra}],
                 type: 'scatter'
             }];
             var layout = {
@@ -48,12 +48,12 @@ body
         div(id='history', style='width:600px;height:250px')
         script.
             var data = [{
-                x: !{xDaily}
-                y: !{yDaily}
+                x: [!{xDaily}],
+                y: [!{yDaily}],
                 type: 'scatter'
             }];
             var layout = {
-                title: 'Price History'
+                title: 'Price History',
                 xaxis: {
                     autorange: true,
                     rangeselector: {buttons: [
