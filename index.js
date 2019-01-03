@@ -4,24 +4,6 @@ let apiKey = 'F24C5SOKOYQUBV6K';
 
 module.exports = {
     getCurrentPrice: currentPrice,
-    twoPlots: function (symbol, call) {
-        function secondCall (dict1) {
-            recentData(symbol, {mode: 'daily'}, function (dict2) {
-                let current = currentPrice(dict1, function () {});
-                let x1 = Object.keys(dict1);
-                let y1 = Object.values(dict1).map(s => s['4. close']);
-                let x2 = Object.keys(dict2);
-                let y2 = Object.values(dict2).map(s => s['4. close']);
-                console.log('here too')
-                if (isEmpty(dict1)) {
-                    call(current, 0, 0, 0, 0);
-                } else {
-                    call(current, [1, 2, 3], [1, 2, 3], [10, 20, 30], [10, 20, 30]);
-                }
-            })
-        }
-        recentData(symbol, {}, secondCall);
-    }
 }
 
 function recentData(symbol, options, callback) {
@@ -38,7 +20,7 @@ function recentData(symbol, options, callback) {
         options.mode = 'intra'
     }
     if (typeof options.size === "undefined") {
-        options.size = 'full'
+        options.size = 'compact'
     }
     var func;
     if (options.mode === 'intra') {
@@ -69,7 +51,7 @@ function recentData(symbol, options, callback) {
                 let val = stockInfo[`Time Series (${options.time})`];
                 callback(val);
             }
-        });
+        })
     }
     getURL(inner);
 }

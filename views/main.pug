@@ -5,84 +5,15 @@ html
     script(src='https://cdn.plot.ly/plotly-latest.min.js')
 body
     h1 Stocks
-    form(action='checkandload', method='POST')
+    form(action='checkprice', method='POST')
         p Symbol:
         input(type='text', name='symbol', value='')
         input(type='submit')
     if cost
-        p #{cost}
-    if xIntra && yIntra && (xIntra != 0)
-        div(id='recent', style='width:600px;height:250px')
-        script.
-            var data = [{
-                x: [!{xIntra}],
-                y: [!{yIntra}],
-                type: 'scatter'
-            }];
-            var layout = {
-                title: 'Current Price'
-                xaxis: {
-                    autorange: true,
-                    rangeselector: {buttons: [
-                        {
-                            count: 1,
-                            label: '1hr',
-                            step: 'hour',
-                            stepmode: 'backward'
-                        },
-                        {
-                            count: 24,
-                            label: '24hr',
-                            step: 'hour',
-                            stepmode: 'backward'
-                        },
-                        {step: 'all'}
-                    ]} 
-                }
-            }
-            recent = document.getElementById('recent');
-            Plotly.plot(recent, data, layout);
-            /* Current Plotly.js version */
-            console.log(Plotly.BUILD);
-    if xDaily && yDaily && (xDaily != 0)
-        div(id='history', style='width:600px;height:250px')
-        script.
-            var data = [{
-                x: [!{xDaily}],
-                y: [!{yDaily}],
-                type: 'scatter'
-            }];
-            var layout = {
-                title: 'Price History',
-                xaxis: {
-                    autorange: true,
-                    rangeselector: {buttons: [
-                        {
-                            count: 1,
-                            label: '1m',
-                            step: 'month',
-                            stepmode: 'backward'
-                        },
-                        {
-                            count: 6,
-                            label: '6m',
-                            step: 'month',
-                            stepmode: 'backward'
-                        },
-                        {
-                            count: 12,
-                            label: '1yr',
-                            step: 'month',
-                            stepmode: 'backward'
-                        }
-                        {step: 'all'}
-                    ]} 
-                }
-            }
-            recent = document.getElementById('recent');
-            Plotly.plot(recent, data, layout);
-            /* Current Plotly.js version */
-            console.log(Plotly.BUILD);
-
-        
-        
+        p Price per share: #{cost}
+        form(action='buyorsell', method='POST')
+            p Number of shares:
+            input(type='text', name='number', value='')
+            input(type='submit', value='Buy')
+            input(type='submit', value='Sell')
+    
