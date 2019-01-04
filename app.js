@@ -27,6 +27,7 @@ app.post('/buyorsell', function (req, res) {
 })
 
 app.get('/', function (req, res) {
+    backend.initDB();
     res.render('main.pug');
 })
 

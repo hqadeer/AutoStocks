@@ -1,10 +1,63 @@
 const request = require('request');
-
-let apiKey = 'F24C5SOKOYQUBV6K';
+const mysql = require('mysql');
 
 module.exports = {
     getCurrentPrice: currentPrice,
+    initDB: initDatabase
 }
+
+var conn = mysql.createConnection({
+    host : 'localhost',
+    database: 'portfolios',
+    user: 'local',
+    password: 'password',
+    insecureAuth: true
+})
+
+conn.connect(function (err) {
+    if (err) {
+        console.log('Database connection error: ' + err.stack);
+    } else {
+        console.log('Database connection successful.')
+    }
+})
+
+function initDatabase () {
+    function errorHandle (error, results, fields) {
+        if (error) {
+            console.log(error);
+        }
+    }
+    conn.query(
+        'CREATE TABLE IF NOT EXISTS users ( \
+            ID int NOT NULL AUTO_INCREMENT, \
+            username varchar(255) NOT NULL, \
+            hash varchar(255) NOT NULL, \
+            PRIMARY KEY (ID)\
+        );',
+        errorHandle
+    )
+    conn.query(
+        'CREATE TABLE IF NOT EXISTS stocks ( \
+            symbol varchar(255), \
+            number int, \
+            currentPrice int, \
+            currentValue numeric \
+        );',
+        errorHandle
+    )
+    conn.query(
+        'CREATE TABLE IF NOT EXISTS history ( \
+            symbol varchar(255), \
+            number int, \
+            price int, \
+            action varcharr(255) \
+        );',
+        errorHandle
+    )
+}
+
+let apiKey = 'F24C5SOKOYQUBV6K';
 
 function recentData(symbol, options, callback) {
     /* Obtains the past two hours of prices for the
@@ -67,6 +120,14 @@ function currentPrice(symbol, priceCallBack) {
         }
     }
     recentData(symbol, {}, findMostRecent);
+}
+
+function buy (stock, price, shares, balance, buyCallBack) {
+    if ((price * shares) > balance) {
+        buyCallBack('insufficent funds')
+    } else {
+
+    }
 }
 
 function isEmpty (obj) {
