@@ -6,20 +6,13 @@ module.exports = {
     initDB: initDatabase
 }
 
-var conn = mysql.createConnection({
+var conn = mysql.createPool({
+    connectionLimit: 10,
     host : 'localhost',
     database: 'portfolios',
     user: 'local',
     password: 'password',
     insecureAuth: true
-})
-
-conn.connect(function (err) {
-    if (err) {
-        console.log('Database connection error: ' + err.stack);
-    } else {
-        console.log('Database connection successful.')
-    }
 })
 
 function errorHandle (error, results, fields) {
@@ -34,7 +27,7 @@ function initDatabase () {
             ID int NOT NULL AUTO_INCREMENT, \
             username varchar(255) NOT NULL, \
             hash varchar(255) NOT NULL, \
-            balance numeric DEFAULT 100000 \
+            balance numeric DEFAULT 100000, \
             PRIMARY KEY (ID) \
         );',
         errorHandle
@@ -49,7 +42,7 @@ function initDatabase () {
     )
     conn.query(
         'CREATE TABLE IF NOT EXISTS history ( \
-            ID int \
+            ID int, \
             symbol varchar(255), \
             number int, \
             price int, \
@@ -57,6 +50,7 @@ function initDatabase () {
         );',
         errorHandle
     )
+    console.log('Database connection and initialization successful.')
 }
 
 let apiKey = 'F24C5SOKOYQUBV6K';
@@ -124,19 +118,19 @@ function currentPrice(symbol, priceCallBack) {
     recentData(symbol, {}, findMostRecent);
 }
 
-function buy (stock, price, shares, buyCallBack) {
+function buy (id, stock, price, shares, buyCallBack) {
     if ((price * shares) > balance) {
         buyCallBack('Insufficient Funds.');
     } else {
         newBalance = balance - (price * shares);
         conn.query(
             'INSERT INTO history VALUES ( \
-                ?, ?, ?, "buy");',
-            [stock, shares, price],
+                ?, ?, ?, ?, "buy");',
+            [id, stock, shares, price],
             errorHandle
         );
         conn.query(
-            ''
+            'INSERT INTO'
         )
     }
 }
