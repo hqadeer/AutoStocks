@@ -22,18 +22,20 @@ conn.connect(function (err) {
     }
 })
 
-function initDatabase () {
-    function errorHandle (error, results, fields) {
-        if (error) {
-            console.log(error);
-        }
+function errorHandle (error, results, fields) {
+    if (error) {
+        console.log(error);
     }
+}
+
+function initDatabase () {
     conn.query(
         'CREATE TABLE IF NOT EXISTS users ( \
             ID int NOT NULL AUTO_INCREMENT, \
             username varchar(255) NOT NULL, \
             hash varchar(255) NOT NULL, \
-            PRIMARY KEY (ID)\
+            balance numeric DEFAULT 100000 \
+            PRIMARY KEY (ID) \
         );',
         errorHandle
     )
@@ -122,9 +124,15 @@ function currentPrice(symbol, priceCallBack) {
 
 function buy (stock, price, shares, balance, buyCallBack) {
     if ((price * shares) > balance) {
-        buyCallBack('insufficent funds')
+        buyCallBack(balance);
     } else {
-
+        newBalance = balance - (price * shares);
+        conn.query(
+            'INSERT INTO history VALUES ( \
+                ?, ?, ?, "buy");',
+            [stock, shares, price],
+            errorHandle
+        );
     }
 }
 
