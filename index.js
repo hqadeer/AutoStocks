@@ -41,6 +41,7 @@ function initDatabase () {
     )
     conn.query(
         'CREATE TABLE IF NOT EXISTS stocks ( \
+            ID int, \
             symbol varchar(255), \
             number int \
         );',
@@ -48,6 +49,7 @@ function initDatabase () {
     )
     conn.query(
         'CREATE TABLE IF NOT EXISTS history ( \
+            ID int \
             symbol varchar(255), \
             number int, \
             price int, \
@@ -122,9 +124,9 @@ function currentPrice(symbol, priceCallBack) {
     recentData(symbol, {}, findMostRecent);
 }
 
-function buy (stock, price, shares, balance, buyCallBack) {
+function buy (stock, price, shares, buyCallBack) {
     if ((price * shares) > balance) {
-        buyCallBack(balance);
+        buyCallBack('Insufficient Funds.');
     } else {
         newBalance = balance - (price * shares);
         conn.query(
@@ -133,6 +135,9 @@ function buy (stock, price, shares, balance, buyCallBack) {
             [stock, shares, price],
             errorHandle
         );
+        conn.query(
+            ''
+        )
     }
 }
 
