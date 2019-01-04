@@ -130,8 +130,16 @@ function buy (id, stock, price, shares, buyCallBack) {
             errorHandle
         );
         conn.query(
-            'INSERT INTO'
-        )
+            'SELECT * FROM stocks \
+                WHERE ID=? AND symbol=?;',
+            [id, stock],
+            function (error, results, fields) {
+                var hasBought = (results.length > 0)
+            }
+        );
+        if (hasBought) {
+            
+        }
     }
 }
 
