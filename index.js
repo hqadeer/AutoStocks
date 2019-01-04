@@ -40,9 +40,7 @@ function initDatabase () {
     conn.query(
         'CREATE TABLE IF NOT EXISTS stocks ( \
             symbol varchar(255), \
-            number int, \
-            currentPrice int, \
-            currentValue numeric \
+            number int \
         );',
         errorHandle
     )
@@ -51,7 +49,7 @@ function initDatabase () {
             symbol varchar(255), \
             number int, \
             price int, \
-            action varcharr(255) \
+            action varchar(255) \
         );',
         errorHandle
     )

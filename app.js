@@ -27,10 +27,10 @@ app.post('/buyorsell', function (req, res) {
 })
 
 app.get('/', function (req, res) {
-    backend.initDB();
     res.render('main.pug');
 })
 
 app.listen(4800, function () {
+    backend.initDB();
     console.log('listening on port 4800');
 })
