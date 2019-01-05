@@ -3,7 +3,9 @@ const mysql = require('mysql');
 
 module.exports = {
     getCurrentPrice: currentPrice,
-    initDB: initDatabase
+    initDB: initDatabase,
+    buy: buy,
+    sell: sell
 }
 
 var conn = mysql.createPool({
@@ -225,7 +227,6 @@ function sell (id, symbol, price, number, sellCallBack) {
     );
 }
 
-// todo: sell function
 // todo: background database updates for price every 15 mins
 // todo: (frontend): get symbol, price, shares from frontend form
 // todo: (frontend and backend): authentication

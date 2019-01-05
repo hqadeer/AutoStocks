@@ -14,16 +14,23 @@ app.set('view engine', 'pug')
 app.set("views", path.join(__dirname, "views"))
 
 app.post('/checkprice', function (req, res) {
+    theSymbol = req.body.symbol
     backend.getCurrentPrice(req.body.symbol, function (price, symbol) {
-        console.log(symbol)
         thePrice = price;
         res.render('main', {cost: price});
     })
      // with price displayed
 })
 
-app.post('/buyorsell', function (req, res) {
-    alert('not done yet')
+app.post('/buy', function (req, res) {
+    console.log(theSymbol)
+    console.log(thePrice)
+    console.log(req.body.number)
+    console.log('buy')
+})
+
+app.post('/sell', function (req, res) {
+    console.log('sell');
 })
 
 app.get('/', function (req, res) {

@@ -14,6 +14,5 @@ body
         form(action='buyorsell', method='POST')
             p Number of shares:
             input(type='text', name='number', value='')
-            input(type='submit', value='Buy')
-            input(type='submit', value='Sell')
-    
+            input(type='submit', formaction='buy', value='Buy')
+            input(type='submit', formaction='sell', value='Sell')
