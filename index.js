@@ -177,6 +177,14 @@ function buy (id, stock, price, shares, buyCallBack) {
     );
 }
 
+// todo: sell function
+// todo: background database updates for price every 15 mins
+// todo: (frontend): get symbol, price, shares from frontend form
+// todo: (frontend and backend): authentication
+// todo: (frontend): representing database in html table
+// todo: (frontend): aesthetic improvements with bootstrap
+// todo: write custom requests for python wrapper
+
 function isEmpty (obj) {
     for (var i in obj) {
         return false;
