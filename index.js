@@ -36,7 +36,8 @@ function initDatabase () {
         'CREATE TABLE IF NOT EXISTS stocks ( \
             ID int, \
             symbol varchar(255), \
-            number int \
+            number int, \
+            price numeric \
         );',
         errorHandle
     )
@@ -119,28 +120,61 @@ function currentPrice(symbol, priceCallBack) {
 }
 
 function buy (id, stock, price, shares, buyCallBack) {
-    if ((price * shares) > balance) {
-        buyCallBack('Insufficient Funds.');
-    } else {
-        newBalance = balance - (price * shares);
-        conn.query(
-            'INSERT INTO history VALUES ( \
-                ?, ?, ?, ?, "buy");',
-            [id, stock, shares, price],
-            errorHandle
-        );
-        conn.query(
-            'SELECT * FROM stocks \
-                WHERE ID=? AND symbol=?;',
-            [id, stock],
-            function (error, results, fields) {
-                var hasBought = (results.length > 0)
+    conn.query(
+        'SELECT balance FROM users WHERE id = ?',
+        [id],
+        function (error, results, fields) {
+            if (error) {
+                console.log(error)
             }
-        );
-        if (hasBought) {
-            
+            if ((price * shares) > results.balance) {
+                buyCallBack('Insufficient funds.');
+            } else {
+                conn.query(
+                    'UPDATE users \
+                    SET balance = ? \
+                    WHERE id = ?;',
+                    [balance - price * shares, id],
+                    errorHandle
+                );
+                conn.query(
+                    'INSERT INTO history VALUES ( \
+                        ?, ?, ?, ?, "buy");',
+                    [id, stock, shares, price],
+                    errorHandle
+                );
+                conn.query(
+                    'SELECT * FROM stocks \
+                        WHERE ID=? AND symbol=?;',
+                    [id, stock],
+                    function (error, results, fields) {
+                        if (error) {
+                            console.log(error)
+                        }
+                        if (results.length > 0) {
+                            conn.query(
+                                'UPDATE stocks \
+                                SET number = number + ? \
+                                WHERE ID=? AND symbol=?;',
+                                [shares, id, stock],
+                                errorHandle
+                            );
+                        } else {
+                            conn.query(
+                                'INSERT INTO stocks VALUES( \
+                                    ?, ?, ?, ? \
+                                );',
+                                [id, stock, shares, price],
+                                errorHandle
+                            );
+                        }
+                        buyCallBack(`Purchased ${shares} shares of ${stock} @` +
+                                    `$${price}`);
+                    }
+                );
+            }
         }
-    }
+    );
 }
 
 function isEmpty (obj) {
