@@ -83,9 +83,11 @@ function recentData(symbol, options, callback) {
         var URL;
         let base = 'https://www.alphavantage.co/query?function='
         if (options.mode === 'intra') {
-            URL = base + `${func}&symbol=${symbol}&interval=${options.time}&outputsize=${options.size}&apikey=${apiKey}`;
+            URL = base + `${func}&symbol=${symbol}&interval=${options.time}&`+
+                         `outputsize=${options.size}&apikey=${apiKey}`;
         } else {
-            URL = base + `${func}&symbol=${symbol}&outputsize=${options.size}&apikey=${apiKey}`;
+            URL = base + `${func}&symbol=${symbol}&outputsize=${options.size}`+
+                         `&apikey=${apiKey}`;
         }
         inner(URL);
     }
@@ -121,7 +123,7 @@ function currentPrice(symbol, priceCallBack) {
 
 function buy (id, stock, price, shares, buyCallBack) {
     conn.query(
-        'SELECT balance FROM users WHERE id = ?',
+        'SELECT balance FROM users WHERE id = ?;',
         [id],
         function (error, results, fields) {
             if (error) {
@@ -132,9 +134,9 @@ function buy (id, stock, price, shares, buyCallBack) {
             } else {
                 conn.query(
                     'UPDATE users \
-                    SET balance = ? \
+                    SET balance = balance - ? \
                     WHERE id = ?;',
-                    [balance - price * shares, id],
+                    [price * shares, id],
                     errorHandle
                 );
                 conn.query(
@@ -145,7 +147,7 @@ function buy (id, stock, price, shares, buyCallBack) {
                 );
                 conn.query(
                     'SELECT * FROM stocks \
-                        WHERE ID=? AND symbol=?;',
+                    WHERE ID=? AND symbol=?;',
                     [id, stock],
                     function (error, results, fields) {
                         if (error) {
@@ -172,6 +174,52 @@ function buy (id, stock, price, shares, buyCallBack) {
                                     `$${price}`);
                     }
                 );
+            }
+        }
+    );
+}
+
+function sell (id, symbol, price, number, sellCallBack) {
+    conn.query(
+        'SELECT number FROM stocks WHERE ID=? AND symbol=?;',
+        [id, symbol],
+        function (error, results, fields) {
+            if (error) {
+                console.log(error);
+            }
+            if (results.number < number) {
+                sellCallBack('Insufficient shares');
+            } else {
+                conn.query(
+                    'UPDATE users \
+                    SET balance = balance + ? \
+                    WHERE id = ?;',
+                    [price * number, id],
+                    errorHandle
+                );
+                conn.query(
+                    'INSERT INTO history VALUES ( \
+                        ?, ?, ?, ?, "sell");',
+                    [id, symbol, number, price],
+                    errorHandle
+                );
+                if (results.number > number) {
+                    conn.query(
+                        'UPDATE stocks \
+                        SET number = number - ? \
+                        WHERE ID=? AND symbol=?;',
+                        [number, id, symbol],
+                        errorHandle
+                    );
+                } else if (results.number === number) {
+                    conn.query(
+                        'DELETE FROM stocks WHERE ID=? AND symbol=?',
+                        [id, symbol],
+                        errorHandle
+                    );
+                }
+                sellCallBack(`Sold ${shares} shares of ${stock} @` +
+                             `$${price}`);
             }
         }
     );
