@@ -9,6 +9,9 @@ body
             label Password:
             input(type='text', name='password')
         div 
-            input(type='submit', value='Register')
+            input(type='submit', value='Log In')
     div 
-     p ${message}
+        a(href='/signup') Don't have an account? Sign up.
+    if message
+        div 
+            p #{message}

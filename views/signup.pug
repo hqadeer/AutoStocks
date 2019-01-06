@@ -5,13 +5,15 @@ body
         div
             label Username:
             input(type='text', name='username')
+        div
         div 
             label Password:
             input(type='text', name='password')
         div 
+        div 
             input(type='submit', value='Register')
     div
-        p Already have an account? Sign in
-        a(href='/login') here.
-    div 
-        p ${message}
+        a(href='/login') Already have an account? Click to log in.
+    if message
+        div 
+            p #{message}

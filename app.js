@@ -7,6 +7,7 @@ const bodyParser = require('body-parser')
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const session = require('express-session');
+const flash = require('connect-flash')
 const app = express()
 
 // Configuration, some code borrowed from Passport docs
@@ -17,6 +18,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false
 }));
+app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 app.set('view engine', 'pug')
