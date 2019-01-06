@@ -9,48 +9,70 @@ const LocalStrategy = require('passport-local').Strategy;
 const session = require('express-session');
 const app = express()
 
-// Configuration, some code borrowed from passport js documentation
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(session({secret: 'hobbs' }));
+// Configuration, some code borrowed from Passport docs
+app.use(express.static('public'));
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(session({
+    secret: 'hobbs',
+    resave: false,
+    saveUninitialized: false
+}));
 app.use(passport.initialize());
 app.use(passport.session());
 app.set('view engine', 'pug')
 app.set("views", path.join(__dirname, "views"))
 
-passport.use(new LocalStrategy(
+passport.use('local-login', new LocalStrategy(
     function (username, password, passBack) {
         User.findUser(username, function (err, user) {
             if (err) {
-                return done(err);
+                return passBack(err);
             } else if (!user) {
-                return done(null, false, { message: 'Invalid username.' });
+                return passBack(null, false, { message: 'Invalid username.' });
             } else if (!user.verify(password)) {
-                return done(null, false, { message: 'Incorrect password.' });
+                return passBack(null, false, { message: 'Incorrect password.' });
             } else {
-                theId = user.id;
-                return done(null, user);
+                return passBack(null, user);
             }
         });
     }
 ));
+
+passport.use('local-signup', new LocalStrategy(User.register));
 
 // Miscellaneous variables
 var thePrice;
 var balance;
 var theId;
 
+function isAuth (req, res, call) {
+    if (req.isAuthenticated()) {
+        return call();
+    }
+    res.redirect('/login');
+}
+
 
 // Routes
+app.get('/login', function (req, res) {
+    res.render('login', { message: req.flash('loginMessage') });
+});
+
 app.post('/login',
-  passport.authenticate('local', { successRedirect: '/',
-                                   failureRedirect: '/login',
-                                   failureFlash: true })
+    passport.authenticate('local-login', { successRedirect: '/',
+                                           failureRedirect: '/login',
+                                           failureFlash: true })
 );
 
-app.post('/register', function (req, res) {
-    console.log(req.body.username);
-    console.log(req.body.password);
-});
+app.get('/signup', function (req, res) {
+    res.render('signup', { message: req.flash('loginMessage') });
+})
+
+app.post('/signup',
+    passport.authenticate('local-signup', { successRedirect: '/',
+                                            failureRedirect: '/signup',
+                                            failureFlash: true })
+);
 
 app.post('/checkprice', function (req, res) {
     theSymbol = req.body.symbol
