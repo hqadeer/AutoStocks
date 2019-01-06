@@ -3,7 +3,7 @@ const conn = require('../controllers').conn;
 
 class User {
     constructor (attr) {
-        this.username = attr.username;
+        this.id = attr.ID;
         this.salt = attr.salt;
         this.hash = attr.hash;
     }
@@ -11,7 +11,7 @@ class User {
     verify (password) {
         let testHash =
         crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString('hex');
-        return (tetstHash === this.hash)
+        return (testHash === this.hash)
     }
 }
 
@@ -44,6 +44,24 @@ module.exports.register = function (username, password, regCallback) {
                     );
                 });
                 regCallback(`Registered user ${username}`);
+            }
+        }
+    );
+}
+
+module.exports.findUser = function (username, findCallback) {
+    conn.query(
+        'SELECT ID, salt, hash FROM users WHERE ID=?', [username],
+        function (error, results, fields) {
+            if (error) {
+                findCallback(error, null);
+            } else if (results.length === 0) {
+                findCallback(
+                    new Error(`No user with username ${username}`),
+                    null
+                );
+            } else {
+                findCallback(null, new User(results))
             }
         }
     );
