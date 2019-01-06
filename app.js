@@ -27,6 +27,7 @@ passport.use(new LocalStrategy(
             } else if (!user.verify(password)) {
                 return done(null, false, { message: 'Incorrect password.' });
             } else {
+                theId = user.id;
                 return done(null, user);
             }
         });
@@ -36,6 +37,7 @@ passport.use(new LocalStrategy(
 // Miscellaneous variables
 var thePrice;
 var balance;
+var theId;
 
 
 // Routes
@@ -45,6 +47,11 @@ app.post('/login',
                                    failureFlash: true })
 );
 
+app.post('/register', function (req, res) {
+    console.log(req.body.username);
+    console.log(req.body.password);
+});
+
 app.post('/checkprice', function (req, res) {
     theSymbol = req.body.symbol
     backend.getCurrentPrice(req.body.symbol, function (price, symbol) {
@@ -52,7 +59,7 @@ app.post('/checkprice', function (req, res) {
         res.render('main', {cost: price});
     })
      // with price displayed
-})
+});
 
 app.post('/buy', function (req, res) {
     console.log(theSymbol)
@@ -63,13 +70,13 @@ app.post('/buy', function (req, res) {
 
 app.post('/sell', function (req, res) {
     console.log('sell');
-})
+});
 
 app.get('/', function (req, res) {
     res.render('main.pug');
-})
+});
 
 app.listen(4800, function () {
     backend.initDB();
     console.log('listening on port 4800');
-})
+});

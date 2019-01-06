@@ -29,7 +29,8 @@ module.exports.register = function (username, password, regCallback) {
                 console.log(error);
             }
             if (results.length > 0) {
-                regCallback('Username is taken');
+                regCallback(new Error('Invalid username'),
+                            'Username is taken');
             } else {
                 hash (password, function (username, salt, hash) {
                     conn.query(
@@ -43,7 +44,7 @@ module.exports.register = function (username, password, regCallback) {
                         }
                     );
                 });
-                regCallback(`Registered user ${username}`);
+                regCallback(null, `Registered user ${username}`);
             }
         }
     );
