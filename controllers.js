@@ -26,8 +26,8 @@ function errorHandle (error, results, fields) {
 function initDatabase () {
     conn.query(
         'CREATE TABLE IF NOT EXISTS users ( \
-            ID int NOT NULL AUTO_INCREMENT, \
-            username varchar(255) NOT NULL, \
+            ID varchar(255) UNIQUE NOT NULL AUTO_INCREMENT, \
+            salt varchar(255) NOT NULL, \
             hash varchar(255) NOT NULL, \
             balance numeric DEFAULT 100000, \
             PRIMARY KEY (ID) \
