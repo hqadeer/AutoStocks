@@ -5,7 +5,8 @@ module.exports = {
     getCurrentPrice: currentPrice,
     initDB: initDatabase,
     buy: buy,
-    sell: sell
+    sell: sell,
+    conn: conn
 }
 
 var conn = mysql.createPool({
@@ -30,7 +31,7 @@ function initDatabase () {
             salt varchar(255) NOT NULL, \
             hash varchar(255) NOT NULL, \
             balance numeric DEFAULT 100000, \
-            PRIMARY KEY (ID) \
+            PRIMARY KEY (ID), \
         );',
         errorHandle
     )
