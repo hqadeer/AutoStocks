@@ -74,7 +74,7 @@ app.post('/signup',
                                             failureFlash: true })
 );
 
-app.post('/checkprice', function (req, res) {
+app.post('/checkprice', isAuth, function (req, res) {
     theSymbol = req.body.symbol
     backend.getCurrentPrice(req.body.symbol, function (price, symbol) {
         thePrice = price;
@@ -83,18 +83,18 @@ app.post('/checkprice', function (req, res) {
      // with price displayed
 });
 
-app.post('/buy', function (req, res) {
+app.post('/buy', isAuth, function (req, res) {
     console.log(theSymbol)
     console.log(thePrice)
     console.log(req.body.number)
     console.log('buy')
 })
 
-app.post('/sell', function (req, res) {
+app.post('/sell', isAuth, function (req, res) {
     console.log('sell');
 });
 
-app.get('/', function (req, res) {
+app.get('/', isAuth, function (req, res) {
     res.render('main.pug');
 });
 
