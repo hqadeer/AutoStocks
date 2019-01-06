@@ -1,5 +1,6 @@
 // Dependencies
 const backend = require('./controllers')
+const User = require('./models/User')
 const path = require('path')
 const express = require('express')
 const bodyParser = require('body-parser')
@@ -16,6 +17,21 @@ app.use(passport.session());
 app.set('view engine', 'pug')
 app.set("views", path.join(__dirname, "views"))
 
+passport.use(new LocalStrategy(
+    function (username, password, passBack) {
+        User.findUser(username, function (err, user) {
+            if (err) {
+                return done(err);
+            } else if (!user) {
+                return done(null, false, { message: 'Invalid username.' });
+            } else if (!user.verify(password)) {
+                return done(null, false, { message: 'Incorrect password.' });
+            } else {
+                return done(null, user);
+            }
+        });
+    }
+));
 
 // Miscellaneous variables
 var thePrice;
