@@ -39,6 +39,12 @@ var balance;
 
 
 // Routes
+app.post('/login',
+  passport.authenticate('local', { successRedirect: '/',
+                                   failureRedirect: '/login',
+                                   failureFlash: true })
+);
+
 app.post('/checkprice', function (req, res) {
     theSymbol = req.body.symbol
     backend.getCurrentPrice(req.body.symbol, function (price, symbol) {
