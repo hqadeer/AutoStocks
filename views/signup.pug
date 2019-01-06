@@ -1,6 +1,6 @@
 html
     head
-body
+body 
     form(action='/login', method='POST')
         div
             label Username:
@@ -10,5 +10,8 @@ body
             input(type='text', name='password')
         div 
             input(type='submit', value='Register')
+    div
+        p Already have an account? Sign in
+        a(href='/login') here.
     div 
-     p ${message}
+        p ${message}
