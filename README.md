@@ -1,11 +1,11 @@
-# stocks
+# Stocks
 [IN PROGRESS]
 
-$$$ Goal:
+### Goal:
 A Node.js web app to manage a virtual stock portfolio and provide API end-points
  to test trading algorithms.
 
-$$$ Current features:
+### Current features:
 
 1) Secure logins and sign-ups using Passport.js
 
@@ -15,7 +15,7 @@ $$$ Current features:
 
 4) Data storage (both for users and for stock portfolios) using MySQL.
 
-$$$ To-do:
+### To-do:
 
 1) Front-end work on aesthetics and interactivity using JQuery and Bootstrap.
 
