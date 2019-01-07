@@ -17,6 +17,8 @@ A Node.js web app to manage a virtual stock portfolio and provide API end-points
 
 ### To-do:
 
+0) Basics: Visualize SQL table in HTML and update price data regularly
+
 1) Front-end work on aesthetics and interactivity using JQuery and Bootstrap.
 
 2) Front-end support for graphs and tables to visually see portfolio.
