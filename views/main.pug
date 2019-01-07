@@ -1,16 +1,11 @@
-// Variables: cost, message
+extends ./parent.pug
 
-html
-    head
-    script(src='https://cdn.plot.ly/plotly-latest.min.js')
-body
+block content
     div(class='topnav')
         a(href='/logout') Log out 
     h1 Stocks
-    form(action='checkprice', method='POST')
-        p Symbol:
-        input(type='text', name='symbol', value='')
-        input(type='submit')
+    div(class="input-group mb-3")
+        input(type="text", name=class="form-control", placeholder="Recipient's username", aria-label="Recipient's username", aria-describedby="basic-addon2")
     if cost
         p Price per share: #{cost}
         form(action='buyorsell', method='POST')
@@ -20,3 +15,4 @@ body
             input(type='submit', formaction='sell', value='Sell')
     if message 
         p #{message}
+    
