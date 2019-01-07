@@ -1,5 +1,6 @@
 // Dependencies
 const backend = require('./controllers')
+const db = require('./config/db')
 const User = require('./models/User')
 const path = require('path')
 const express = require('express')
@@ -101,6 +102,6 @@ app.get('/', isAuth, function (req, res) {
 });
 
 app.listen(4800, function () {
-    backend.initDB();
+    db.init()
     console.log('listening on port 4800');
 });

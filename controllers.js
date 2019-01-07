@@ -1,60 +1,16 @@
 const request = require('request');
-const mysql = require('mysql');
+const db = require('./config/db')
 
 module.exports = {
     getCurrentPrice: currentPrice,
-    initDB: initDatabase,
     buy: buy,
     sell: sell,
-    conn: conn
 }
-
-var conn = mysql.createPool({
-    connectionLimit: 10,
-    host : 'localhost',
-    database: 'portfolios',
-    user: 'local',
-    password: 'password',
-    insecureAuth: true
-})
 
 function errorHandle (error, results, fields) {
     if (error) {
-        console.log(error);
+        throw error;
     }
-}
-
-function initDatabase () {
-    conn.query(
-        'CREATE TABLE IF NOT EXISTS users ( \
-            ID varchar(255) UNIQUE NOT NULL, \
-            salt varchar(255) NOT NULL, \
-            hash varchar(255) NOT NULL, \
-            balance numeric DEFAULT 100000, \
-            PRIMARY KEY (ID) \
-        );',
-        errorHandle
-    )
-    conn.query(
-        'CREATE TABLE IF NOT EXISTS stocks ( \
-            ID int, \
-            symbol varchar(255), \
-            number int, \
-            price numeric \
-        );',
-        errorHandle
-    )
-    conn.query(
-        'CREATE TABLE IF NOT EXISTS history ( \
-            ID int, \
-            symbol varchar(255), \
-            number int, \
-            price int, \
-            action varchar(255) \
-        );',
-        errorHandle
-    )
-    console.log('Database connection and initialization successful.')
 }
 
 let apiKey = 'F24C5SOKOYQUBV6K';
@@ -125,107 +81,117 @@ function currentPrice(symbol, priceCallBack) {
 }
 
 function buy (id, stock, price, shares, buyCallBack) {
-    conn.query(
-        'SELECT balance FROM users WHERE id = ?;',
-        [id],
-        function (error, results, fields) {
-            if (error) {
-                console.log(error)
-            }
-            if ((price * shares) > results.balance) {
-                buyCallBack('Insufficient funds.');
-            } else {
-                conn.query(
-                    'UPDATE users \
-                    SET balance = balance - ? \
-                    WHERE id = ?;',
-                    [price * shares, id],
-                    errorHandle
-                );
-                conn.query(
-                    'INSERT INTO history VALUES ( \
-                        ?, ?, ?, ?, "buy");',
-                    [id, stock, shares, price],
-                    errorHandle
-                );
-                conn.query(
-                    'SELECT * FROM stocks \
-                    WHERE ID=? AND symbol=?;',
-                    [id, stock],
-                    function (error, results, fields) {
-                        if (error) {
-                            console.log(error)
-                        }
-                        if (results.length > 0) {
-                            conn.query(
-                                'UPDATE stocks \
-                                SET number = number + ? \
-                                WHERE ID=? AND symbol=?;',
-                                [shares, id, stock],
-                                errorHandle
-                            );
-                        } else {
-                            conn.query(
-                                'INSERT INTO stocks VALUES( \
-                                    ?, ?, ?, ? \
-                                );',
-                                [id, stock, shares, price],
-                                errorHandle
-                            );
-                        }
-                        buyCallBack(`Purchased ${shares} shares of ${stock} @` +
-                                    `$${price}`);
-                    }
-                );
-            }
+    db.getConn(function (err, conn) {
+        if (err) {
+            throw err;
         }
-    );
+        conn.query(
+            'SELECT balance FROM users WHERE id = ?;',
+            [id],
+            function (error, results, fields) {
+                if (error) {
+                    console.log(error)
+                }
+                if ((price * shares) > results.balance) {
+                    buyCallBack('Insufficient funds.');
+                } else {
+                    conn.query(
+                        'UPDATE users \
+                        SET balance = balance - ? \
+                        WHERE id = ?;',
+                        [price * shares, id],
+                        errorHandle
+                    );
+                    conn.query(
+                        'INSERT INTO history VALUES ( \
+                            ?, ?, ?, ?, "buy");',
+                        [id, stock, shares, price],
+                        errorHandle
+                    );
+                    conn.query(
+                        'SELECT * FROM stocks \
+                        WHERE ID=? AND symbol=?;',
+                        [id, stock],
+                        function (error, results, fields) {
+                            if (error) {
+                                console.log(error)
+                            }
+                            if (results.length > 0) {
+                                conn.query(
+                                    'UPDATE stocks \
+                                    SET number = number + ? \
+                                    WHERE ID=? AND symbol=?;',
+                                    [shares, id, stock],
+                                    errorHandle
+                                );
+                            } else {
+                                conn.query(
+                                    'INSERT INTO stocks VALUES( \
+                                        ?, ?, ?, ? \
+                                    );',
+                                    [id, stock, shares, price],
+                                    errorHandle
+                                );
+                            }
+                            buyCallBack(`Purchased ${shares} shares of`+
+                                        `${stock} @ $${price}`);
+                        }
+                    );
+                }
+            }
+        );
+    });
 }
 
 function sell (id, symbol, price, number, sellCallBack) {
-    conn.query(
-        'SELECT number FROM stocks WHERE ID=? AND symbol=?;',
-        [id, symbol],
-        function (error, results, fields) {
-            if (error) {
-                console.log(error);
-            }
-            if (results.number < number) {
-                sellCallBack('Insufficient shares');
-            } else {
-                conn.query(
-                    'UPDATE users \
-                    SET balance = balance + ? \
-                    WHERE id = ?;',
-                    [price * number, id],
-                    errorHandle
-                );
-                conn.query(
-                    'INSERT INTO history VALUES ( \
-                        ?, ?, ?, ?, "sell");',
-                    [id, symbol, number, price],
-                    errorHandle
-                );
-                if (results.number > number) {
-                    conn.query(
-                        'UPDATE stocks \
-                        SET number = number - ? \
-                        WHERE ID=? AND symbol=?;',
-                        [number, id, symbol],
-                        errorHandle
-                    );
-                } else if (results.number === number) {
-                    conn.query(
-                        'DELETE FROM stocks WHERE ID=? AND symbol=?',
-                        [id, symbol],
-                        errorHandle
-                    );
-                }
-                sellCallBack(`Sold ${shares} shares of ${stock} @` +
-                             `$${price}`);
-            }
+    db.getConn(function (err, conn) {
+        if (err) {
+            throw err;
         }
-    );
+        conn.query(
+            'SELECT number FROM stocks WHERE ID=? AND symbol=?;',
+            [id, symbol],
+            function (error, results, fields) {
+                if (error) {
+                    console.log(error);
+                }
+                if (results.number < number) {
+                    sellCallBack('Insufficient shares');
+                } else {
+                    conn.query(
+                        'UPDATE users \
+                        SET balance = balance + ? \
+                        WHERE id = ?;',
+                        [price * number, id],
+                        errorHandle
+                    );
+                    conn.query(
+                        'INSERT INTO history VALUES ( \
+                            ?, ?, ?, ?, "sell");',
+                        [id, symbol, number, price],
+                        errorHandle
+                    );
+                    if (results.number > number) {
+                        conn.query(
+                            'UPDATE stocks \
+                            SET number = number - ? \
+                            WHERE ID=? AND symbol=?;',
+                            [number, id, symbol],
+                            errorHandle
+                        );
+                    } else if (results.number === number) {
+                        conn.query(
+                            'DELETE FROM stocks WHERE ID=? AND symbol=?',
+                            [id, symbol],
+                            errorHandle
+                        );
+                    }
+                    sellCallBack(`Sold ${shares} shares of ${stock} @` +
+                                 `$${price}`);
+                }
+            }
+        );
+    });
 }
 
 // todo: background database updates for price every 15 mins

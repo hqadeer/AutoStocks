@@ -1,5 +1,7 @@
 const crypto = require('crypto');
-const conn = require('../controllers').conn;
+const conn = require('../controllers');
+
+console.log(conn)
 
 class User {
     constructor (attr) {
