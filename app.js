@@ -108,15 +108,25 @@ app.post('/checkprice', isAuth, function (req, res) {
 });
 
 app.post('/buy', isAuth, function (req, res) {
-    console.log(theSymbol)
-    console.log(thePrice)
-    console.log(req.body.number)
-    console.log(req.user)
-    console.log('buy')
+    backend.buy(req.user.id, theSymbol, thePrice, req.body.number,
+        function (err, msg) {
+            if (err) {
+                throw err;
+            }
+            res.render('main', {cost: thePrice, message: msg});
+        }
+    );
 })
 
 app.post('/sell', isAuth, function (req, res) {
-    console.log('sell');
+    backend.sell(req.user.id, theSymbol, thePrice, req.body.number,
+        function (err, msg) {
+            if (err) {
+                throw err;
+            }
+            res.render('main', {cost: thePrice, message: msg});
+        }
+    );
 });
 
 app.get('/', isAuth, function (req, res) {

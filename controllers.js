@@ -86,10 +86,10 @@ function buy (id, stock, price, shares, buyCallBack) {
             [id],
             function (error, results, fields) {
                 if (error) {
-                    console.log(error)
+                    buyCallBack(error, null)
                 }
                 if ((price * shares) > results.balance) {
-                    buyCallBack('Insufficient funds.');
+                    buyCallBack(null, 'Insufficient funds.');
                 } else {
                     conn.query(
                         'UPDATE users \
@@ -129,8 +129,8 @@ function buy (id, stock, price, shares, buyCallBack) {
                                     errorHandle
                                 );
                             }
-                            buyCallBack(`Purchased ${shares} shares of`+
-                                        `${stock} @ $${price}`);
+                            buyCallBack(null, `Purchased ${shares} shares of`+
+                                              `${stock} @ $${price}`);
                         }
                     );
                 }
@@ -149,10 +149,10 @@ function sell (id, symbol, price, number, sellCallBack) {
             [id, symbol],
             function (error, results, fields) {
                 if (error) {
-                    console.log(error);
+                    sellCallBack(error, null)
                 }
                 if (results.number < number) {
-                    sellCallBack('Insufficient shares');
+                    sellCallBack(null, 'Insufficient shares');
                 } else {
                     conn.query(
                         'UPDATE users \
@@ -182,8 +182,8 @@ function sell (id, symbol, price, number, sellCallBack) {
                             errorHandle
                         );
                     }
-                    sellCallBack(`Sold ${shares} shares of ${stock} @` +
-                                 `$${price}`);
+                    sellCallBack(null, `Sold ${shares} shares of ${stock} @` +
+                                       `$${price}`);
                 }
             }
         );
