@@ -1,4 +1,5 @@
 const mysql = require('mysql');
+const errorHandle = require('./helpers').errorHandle;
 
 var pool = mysql.createPool({
     connectionLimit: 10,
@@ -9,18 +10,12 @@ var pool = mysql.createPool({
     insecureAuth: true
 });
 
-function errorHandle (error, results, fields) {
-    if (error) {
-        throw error;
-    }
-}
-
 module.exports.init = function initDatabase () {
     pool.query(
         'CREATE TABLE IF NOT EXISTS users ( \
             ID varchar(255) UNIQUE NOT NULL, \
             salt varchar(255) NOT NULL, \
-            hash varchar(255) NOT NULL, \
+            hash TEXT NOT NULL, \
             balance numeric DEFAULT 100000, \
             PRIMARY KEY (ID) \
         );',

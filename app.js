@@ -25,6 +25,8 @@ app.use(passport.session());
 app.set('view engine', 'pug')
 app.set("views", path.join(__dirname, "views"))
 
+// Passport configuration
+
 passport.use('local-login', new LocalStrategy(
     function (username, password, passBack) {
         User.findUser(username, function (err, user) {
@@ -43,10 +45,17 @@ passport.use('local-login', new LocalStrategy(
 
 passport.use('local-signup', new LocalStrategy(User.register));
 
+passport.serializeUser(function(user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function(user, done) {
+  done(null, user);
+});
+
+
 // Miscellaneous variables
 var thePrice;
-var balance;
-var theId;
 
 function isAuth (req, res, call) {
     if (req.isAuthenticated()) {

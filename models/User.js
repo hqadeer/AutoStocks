@@ -2,9 +2,6 @@ const crypto = require('crypto');
 const db = require('../config/db');
 const conn = require('../controllers');
 
-
-console.log(conn)
-
 class User {
     constructor (attr) {
         this.id = attr.ID;
@@ -24,7 +21,7 @@ module.exports.register = function (username, password, regCallback) {
         let salt = crypto.randomBytes(16).toString('hex');
         let hash =
         crypto.pbkdf2Sync(password, salt, 10000, 512, 'sha512').toString('hex');
-        regCallback(username, salt, hash)
+        hashCallback(username, salt, hash)
     }
     db.getConn(function (err, conn) {
         if (err) {
@@ -60,7 +57,7 @@ module.exports.register = function (username, password, regCallback) {
 }
 
 module.exports.findUser = function (username, findCallback) {
-    db.getConn(function (err, con) {
+    db.getConn(function (err, conn) {
         if (err) {
             throw err;
         }
@@ -70,12 +67,9 @@ module.exports.findUser = function (username, findCallback) {
                 if (error) {
                     findCallback(error, null);
                 } else if (results.length === 0) {
-                    findCallback(
-                        new Error(`No user with username ${username}`),
-                        null
-                    );
+                    findCallback(null, null);
                 } else {
-                    findCallback(null, new User(results))
+                    findCallback(null, new User(results[0]));
                 }
             }
         );

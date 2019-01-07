@@ -7,7 +7,7 @@ const errorHandle = helpers.errorHandle;
 module.exports = {
     getCurrentPrice: currentPrice,
     buy: buy,
-    sell: sell,
+    sell: sell
 }
 
 let apiKey = 'F24C5SOKOYQUBV6K';
@@ -70,7 +70,6 @@ function currentPrice(symbol, priceCallBack) {
             let msg = symbol + ' is not a valid stock symbol.';
             priceCallBack(msg);
         } else {
-            const comp = (a, b) => (a > b) ? dict[a]['4. close'] : dict[b]['4. close'];
             priceCallBack(dict[Object.keys(dict)[0]]['4. close'])
         }
     }
