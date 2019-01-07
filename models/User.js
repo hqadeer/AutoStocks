@@ -1,5 +1,7 @@
 const crypto = require('crypto');
+const db = require('../config/db');
 const conn = require('../controllers');
+
 
 console.log(conn)
 
@@ -24,48 +26,58 @@ module.exports.register = function (username, password, regCallback) {
         crypto.pbkdf2Sync(password, salt, 10000, 512, 'sha512').toString('hex');
         regCallback(username, salt, hash)
     }
-    conn.query(
-        'SELECT * FROM users WHERE ID=?', [username],
-        function (error, results, fields) {
-            if (error) {
-                console.log(error);
-            }
-            if (results.length > 0) {
-                regCallback(new Error('Invalid username'),
-                            'Username is taken');
-            } else {
-                hash (password, function (username, salt, hash) {
-                    conn.query(
-                        'INSERT INTO users (ID, salt, hash)'+
-                        'VALUES (?, ?, ?);',
-                        [username, salt, hash],
-                        function (error, results, fields) {
-                            if (error) {
-                                console.log(error);
-                            }
-                        }
-                    );
-                });
-                regCallback(null, `Registered user ${username}`);
-            }
+    db.getConn(function (err, conn) {
+        if (err) {
+            throw err;
         }
-    );
+        conn.query(
+            'SELECT * FROM users WHERE ID=?', [username],
+            function (error, results, fields) {
+                if (error) {
+                    console.log(error);
+                }
+                if (results.length > 0) {
+                    regCallback(new Error('Invalid username'),
+                                'Username is taken');
+                } else {
+                    hash (password, function (username, salt, hash) {
+                        conn.query(
+                            'INSERT INTO users (ID, salt, hash)'+
+                            'VALUES (?, ?, ?);',
+                            [username, salt, hash],
+                            function (error, results, fields) {
+                                if (error) {
+                                    console.log(error);
+                                }
+                            }
+                        );
+                    });
+                    regCallback(null, `Registered user ${username}`);
+                }
+            }
+        );
+    });
 }
 
 module.exports.findUser = function (username, findCallback) {
-    conn.query(
-        'SELECT ID, salt, hash FROM users WHERE ID=?', [username],
-        function (error, results, fields) {
-            if (error) {
-                findCallback(error, null);
-            } else if (results.length === 0) {
-                findCallback(
-                    new Error(`No user with username ${username}`),
-                    null
-                );
-            } else {
-                findCallback(null, new User(results))
-            }
+    db.getConn(function (err, con) {
+        if (err) {
+            throw err;
         }
-    );
+        conn.query(
+            'SELECT ID, salt, hash FROM users WHERE ID=?', [username],
+            function (error, results, fields) {
+                if (error) {
+                    findCallback(error, null);
+                } else if (results.length === 0) {
+                    findCallback(
+                        new Error(`No user with username ${username}`),
+                        null
+                    );
+                } else {
+                    findCallback(null, new User(results))
+                }
+            }
+        );
+    });
 }

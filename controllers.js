@@ -1,16 +1,13 @@
 const request = require('request');
-const db = require('./config/db')
+const db = require('./config/db');
+const helpers = require('./config/helpers');
+const isEmpty = helpers.isEmpty;
+const errorHandle = helpers.errorHandle;
 
 module.exports = {
     getCurrentPrice: currentPrice,
     buy: buy,
     sell: sell,
-}
-
-function errorHandle (error, results, fields) {
-    if (error) {
-        throw error;
-    }
 }
 
 let apiKey = 'F24C5SOKOYQUBV6K';
@@ -200,10 +197,3 @@ function sell (id, symbol, price, number, sellCallBack) {
 // todo: (frontend): representing database in html table
 // todo: (frontend): aesthetic improvements with bootstrap
 // todo: write custom requests for python wrapper
-
-function isEmpty (obj) {
-    for (var i in obj) {
-        return false;
-    }
-    return true;
-}
