@@ -1,4 +1,4 @@
-// Variables: cost, xIntra, yIntra, xDaily, yDaily
+// Variables: cost, message
 
 html
     head
@@ -18,3 +18,5 @@ body
             input(type='text', name='number', value='')
             input(type='submit', formaction='buy', value='Buy')
             input(type='submit', formaction='sell', value='Sell')
+    if message 
+        p #{message}

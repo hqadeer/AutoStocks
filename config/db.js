@@ -23,7 +23,7 @@ module.exports.init = function initDatabase () {
     );
     pool.query(
         'CREATE TABLE IF NOT EXISTS stocks ( \
-            ID int, \
+            ID varchar(255), \
             symbol varchar(255), \
             number int, \
             price numeric \
@@ -32,10 +32,10 @@ module.exports.init = function initDatabase () {
     );
     pool.query(
         'CREATE TABLE IF NOT EXISTS history ( \
-            ID int, \
+            ID varchar(255), \
             symbol varchar(255), \
             number int, \
-            price int, \
+            price numeric, \
             action varchar(255) \
         );',
         errorHandle

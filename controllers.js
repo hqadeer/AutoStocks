@@ -88,7 +88,7 @@ function buy (id, stock, price, shares, buyCallBack) {
                 if (error) {
                     buyCallBack(error, null)
                 }
-                if ((price * shares) > results.balance) {
+                if ((price * shares) > results[0].balance) {
                     buyCallBack(null, 'Insufficient funds.');
                 } else {
                     conn.query(
@@ -130,7 +130,7 @@ function buy (id, stock, price, shares, buyCallBack) {
                                 );
                             }
                             buyCallBack(null, `Purchased ${shares} shares of`+
-                                              `${stock} @ $${price}`);
+                                              ` ${stock} @ $${price}`);
                         }
                     );
                 }
@@ -151,7 +151,7 @@ function sell (id, symbol, price, number, sellCallBack) {
                 if (error) {
                     sellCallBack(error, null)
                 }
-                if (results.number < number) {
+                if (results[0].number < number) {
                     sellCallBack(null, 'Insufficient shares');
                 } else {
                     conn.query(
@@ -167,7 +167,7 @@ function sell (id, symbol, price, number, sellCallBack) {
                         [id, symbol, number, price],
                         errorHandle
                     );
-                    if (results.number > number) {
+                    if (results[0].number > number) {
                         conn.query(
                             'UPDATE stocks \
                             SET number = number - ? \
@@ -175,15 +175,15 @@ function sell (id, symbol, price, number, sellCallBack) {
                             [number, id, symbol],
                             errorHandle
                         );
-                    } else if (results.number === number) {
+                    } else if (results[0].number === number) {
                         conn.query(
                             'DELETE FROM stocks WHERE ID=? AND symbol=?',
                             [id, symbol],
                             errorHandle
                         );
                     }
-                    sellCallBack(null, `Sold ${shares} shares of ${stock} @` +
-                                       `$${price}`);
+                    sellCallBack(null, `Sold ${number} shares of ${symbol} @` +
+                                       ` $${price}`);
                 }
             }
         );
@@ -191,7 +191,6 @@ function sell (id, symbol, price, number, sellCallBack) {
 }
 
 // todo: background database updates for price every 15 mins
-// todo: (frontend): get symbol, price, shares from frontend form
 // todo: (frontend): representing database in html table
 // todo: (frontend): aesthetic improvements with bootstrap
 // todo: write custom requests for python wrapper
