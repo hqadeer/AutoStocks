@@ -4,6 +4,8 @@ html
     head
     script(src='https://cdn.plot.ly/plotly-latest.min.js')
 body
+    div(class='topnav')
+        a(href='/logout') Log out 
     h1 Stocks
     form(action='checkprice', method='POST')
         p Symbol:

@@ -27,15 +27,19 @@ app.set("views", path.join(__dirname, "views"))
 
 // Passport configuration
 
-passport.use('local-login', new LocalStrategy(
-    function (username, password, passBack) {
+passport.use('local-login', new LocalStrategy({
+    passReqToCallback: true },
+    function (req, username, password, passBack) {
         User.findUser(username, function (err, user) {
             if (err) {
                 return passBack(err);
             } else if (!user) {
-                return passBack(null, false, { message: 'Invalid username.' });
+                return passBack(null, false, req.flash('message',
+                                                       'Invalid username.'));
             } else if (!user.verify(password)) {
-                return passBack(null, false, { message: 'Incorrect password.' });
+                return passBack(null, false, req.flash('message', 'Oops! That '+
+                                                       'password is '+
+                                                       'incorrect!'));
             } else {
                 return passBack(null, user);
             }
@@ -56,6 +60,7 @@ passport.deserializeUser(function(user, done) {
 
 // Miscellaneous variables
 var thePrice;
+var theSymbol;
 
 function isAuth (req, res, call) {
     if (req.isAuthenticated()) {
@@ -67,6 +72,7 @@ function isAuth (req, res, call) {
 
 // Routes
 app.get('/login', function (req, res) {
+    console.log(req.flash('loginMessage'));
     res.render('login', { message: req.flash('loginMessage') });
 });
 
@@ -86,6 +92,12 @@ app.post('/signup',
                                             failureFlash: true })
 );
 
+app.get('/logout', function (req, res){
+    req.session.destroy(function (err) {
+        res.redirect('/');
+    });
+});
+
 app.post('/checkprice', isAuth, function (req, res) {
     theSymbol = req.body.symbol
     backend.getCurrentPrice(req.body.symbol, function (price, symbol) {
@@ -99,6 +111,7 @@ app.post('/buy', isAuth, function (req, res) {
     console.log(theSymbol)
     console.log(thePrice)
     console.log(req.body.number)
+    console.log(req.user)
     console.log('buy')
 })
 
