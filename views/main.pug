@@ -1,12 +1,12 @@
 extends ./parent.pug
 
 block content
-    div(class='container')
-        h2 Stock lookup
-    div(class='container')
-        form(class='form-inline', action='checkprice', method='POST')
+    h2(class='text-center') Stock Lookup
+
+    div(class='container-fluid')
+        form(class='form-inline justify-content-center', action='checkprice', method='POST')
             div(class='form-group')
-                input(type="text", class="form-control", name="symbol", aria-describedby="symbol", placeholder="Stock symbol")
+                input(type="text", class="form-control", name="symbol", aria-describedby="symbol", placeholder="Enter stock symbol")
             button(type='submit', class='btn btn-primary') Submit
     if cost
         div(class='container')
