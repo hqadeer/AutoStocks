@@ -99,6 +99,7 @@ app.get('/logout', function (req, res){
 });
 
 app.post('/checkprice', isAuth, function (req, res) {
+    console.log(req.body)
     theSymbol = req.body.symbol
     backend.getCurrentPrice(req.body.symbol, function (price, symbol) {
         thePrice = price;

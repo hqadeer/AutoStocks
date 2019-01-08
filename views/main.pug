@@ -1,18 +1,22 @@
 extends ./parent.pug
 
 block content
-    div(class='topnav')
-        a(href='/logout') Log out 
-    h1 Stocks
-    div(class="input-group mb-3")
-        input(type="text", name=class="form-control", placeholder="Recipient's username", aria-label="Recipient's username", aria-describedby="basic-addon2")
+    div(class='container')
+        h2 Stock lookup
+    div(class='container')
+        form(class='form-inline', action='checkprice', method='POST')
+            div(class='form-group')
+                input(type="text", class="form-control", name="symbol", aria-describedby="symbol", placeholder="Stock symbol")
+            button(type='submit', class='btn btn-primary') Submit
     if cost
-        p Price per share: #{cost}
-        form(action='buyorsell', method='POST')
-            p Number of shares:
-            input(type='text', name='number', value='')
-            input(type='submit', formaction='buy', value='Buy')
-            input(type='submit', formaction='sell', value='Sell')
+        div(class='container')
+            p Price per share: #{cost}
+        div(class='container')
+            form(action='buyorsell', method='POST')
+                p Number of shares:
+                input(type='text', name='number', value='')
+                input(type='submit', formaction='buy', value='Buy')
+                input(type='submit', formaction='sell', value='Sell')
     if message 
         p #{message}
     

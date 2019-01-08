@@ -1,6 +1,7 @@
-html
-    head
-body 
+extends ./parent.pug
+
+block navbar
+block content
     form(action='/signup', method='POST')
         div
             label Username:
