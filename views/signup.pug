@@ -2,17 +2,17 @@ extends ./parent.pug
 
 block navbar
 block content
-    form(action='/signup', method='POST')
-        div
-            label Username:
-            input(type='text', name='username')
-        div
-            label Password:
-            input(type='text', name='password')
-        div 
-            input(type='submit', value='Register')
-    div
-        a(href='/login') Already have an account? Click to log in.
+    div(class='login')
+        form(action='/signup', method='POST')
+            div(class='form-group')
+                label(for='username') Username:
+                input(type='text', class='form-control', id='usrnm', aria-describedby='user', placeholder='Enter username', name='username')
+            div(class='form-group')
+                label(for='password') Password:
+                input(type='password', name='password', class='form-control', id='pwd', placeholder='Password')
+            button(type='submit', class='btn btn-primary') Log In
+    div 
+        a(href='/login') Don't have an account? Sign up.
     if message
         div 
             p #{message}
