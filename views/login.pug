@@ -2,16 +2,18 @@ extends ./parent.pug
 
 block content
     h2(class='text-center pt-5 pb-1') Log In
-    div(class='container-fluid pt-3')
-        form(class='form justify-content-center', action='login', method='POST')
-            div(class='form-group')
-                label(for='username') Username:
-                input(type="text", class="form-control mb-3", name="username", aria-describedby="username", placeholder="Enter username")
-                label(for='password') Password:
-                input(type='password', class='form-control', name='password', aria-describedby='password', placeholder='Password')
-            button(type='submit', class='btn btn-primary') Submit
-    div(class='justify-content-center')
-        a(href='/signup') Don't have an account? Sign up.
+    div(class='row')
+        div(class='col-sm')
+        div(class='col-sm ')
+            form(class='form justify-content-center', action='login', method='POST')
+                div(class='form-group')
+                    label(for='username') Username:
+                    input(type="text", class="form-control mb-3", name="username", aria-describedby="username", placeholder="Enter username")
+                    label(for='password') Password:
+                    input(type='password', class='form-control', name='password', aria-describedby='password', placeholder='Password')
+                button(type='submit', class='btn btn-primary') Submit
+            a(href='/signup') Don't have an account? Sign up.
+        div(class='col-sm')
     if message
         div 
             p #{message}

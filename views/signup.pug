@@ -1,18 +1,19 @@
 extends ./parent.pug
 
-block navbar
 block content
-    div(class='login')
-        form(action='/signup', method='POST')
-            div(class='form-group')
-                label(for='username') Username:
-                input(type='text', class='form-control', id='usrnm', aria-describedby='user', placeholder='Enter username', name='username')
-            div(class='form-group')
-                label(for='password') Password:
-                input(type='password', name='password', class='form-control', id='pwd', placeholder='Password')
-            button(type='submit', class='btn btn-primary') Log In
-    div 
-        a(href='/login') Don't have an account? Sign up.
+    h2(class='text-center pt-5 pb-1') Sign Up
+    div(class='row')
+        div(class='col-sm')
+        div(class='col-sm ')
+            form(class='form justify-content-center', action='signup', method='POST')
+                div(class='form-group')
+                    label(for='username') Username:
+                    input(type="text", class="form-control mb-3", name="username", aria-describedby="username", placeholder="Enter username")
+                    label(for='password') Password:
+                    input(type='password', class='form-control', name='password', aria-describedby='password', placeholder='Password')
+                button(type='submit', class='btn btn-primary') Submit
+            a(href='/login') Have an account? Log In.
+        div(class='col-sm')
     if message
         div 
             p #{message}
