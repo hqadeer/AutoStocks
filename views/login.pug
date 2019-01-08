@@ -1,17 +1,16 @@
 extends ./parent.pug
 
-block navbar
 block content
-    div(class='login')
-        form(action='/login', method='POST')
+    h2(class='text-center pt-5 pb-1') Log In
+    div(class='container-fluid pt-3')
+        form(class='form justify-content-center', action='login', method='POST')
             div(class='form-group')
                 label(for='username') Username:
-                input(type='text', class='form-control', id='usrnm', aria-describedby='user', placeholder='Enter username', name='username')
-            div(class='form-group')
+                input(type="text", class="form-control mb-3", name="username", aria-describedby="username", placeholder="Enter username")
                 label(for='password') Password:
-                input(type='password', name='password', class='form-control', id='pwd', placeholder='Password')
-            button(type='submit', class='btn btn-primary') Log In
-    div 
+                input(type='password', class='form-control', name='password', aria-describedby='password', placeholder='Password')
+            button(type='submit', class='btn btn-primary') Submit
+    div(class='justify-content-center')
         a(href='/signup') Don't have an account? Sign up.
     if message
         div 
