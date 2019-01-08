@@ -3,8 +3,8 @@ extends ./parent.pug
 block content
     h2(class='text-center pt-5 pb-1') Sign Up
     div(class='row')
-        div(class='col-sm')
-        div(class='col-sm ')
+        div(class='col-4')
+        div(class='col-4')
             form(class='form justify-content-center', action='signup', method='POST')
                 div(class='form-group')
                     label(for='username') Username:
@@ -13,7 +13,7 @@ block content
                     input(type='password', class='form-control', name='password', aria-describedby='password', placeholder='Password')
                 button(type='submit', class='btn btn-primary') Submit
             a(href='/login') Have an account? Log In.
-        div(class='col-sm')
+        div(class='col-4')
     if message
         div 
             p #{message}
