@@ -1,4 +1,4 @@
-# Stocks
+# AutoStocks
 [IN PROGRESS]
 
 ### Goal:
