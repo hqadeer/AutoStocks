@@ -12,7 +12,7 @@ module.exports = {
 
 let apiKey = 'F24C5SOKOYQUBV6K';
 
-function recentData(symbol, options, callback) {
+function getData(symbol, options, callback) {
     /* Obtains the past two hours of prices for the
        stock specified by symbol and calls callback function
        on it
@@ -59,21 +59,25 @@ function recentData(symbol, options, callback) {
                 let val = stockInfo[`Time Series (${options.time})`];
                 callback(val);
             }
-        })
+        });
     }
     getURL(inner);
 }
 
 function currentPrice(symbol, priceCallBack) {
-    function findMostRecent (dict) {
-        if (isEmpty(dict)) {
-            let msg = symbol + ' is not a valid stock symbol.';
-            priceCallBack(msg);
-        } else {
-            priceCallBack(dict[Object.keys(dict)[0]]['4. close'])
+    let base = 'https://www.alphavantage.co/query?function='
+    URL = base + `GLOBAL_QUOTES&symbol=${symbol}&apikey=${apiKey}`;
+    request(URL, function(err, response, body) {
+        if (err) {
+            throw err;
         }
-    }
-    recentData(symbol, {}, findMostRecent);
+        let priceInfo = JSON.parse(body)['Global Quote'];
+        if (!priceInfo) {
+            priceCallBack(new Error('Invalid symbol.'), null);
+        } else {
+            priceCallBack(null, priceInfo['05. price'];
+        }
+    });
 }
 
 function buy (id, stock, price, shares, buyCallBack) {
