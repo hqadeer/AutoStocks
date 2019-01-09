@@ -1,5 +1,4 @@
 # AutoStocks
-[IN PROGRESS]
 
 ### Goal:
 A Node.js web app to manage a virtual stock portfolio and provide API end-points
@@ -15,18 +14,18 @@ A Node.js web app to manage a virtual stock portfolio and provide API end-points
 
 4) Data storage (both for users and for stock portfolios) using MySQL.
 
+5) Effective tracking of current stock prices in database.
+
+### In-Progress:
+
+1) Front-end work on aesthetics and interactivity using jQuery and bootstrap.
+
+2) Front-end work on graphs and tables to visually see portfolio and track balance.
+
 ### To-do:
 
-0) Basics: Visualize SQL table in HTML and update price data regularly
+1) API end-points and Python wrapper to test trading algos.
 
-1) Front-end work on aesthetics and interactivity using JQuery and Bootstrap.
+2) Work on trading algos.
 
-2) Front-end support for graphs and tables to visually see portfolio.
-
-3) API end-points and Python wrapper to test trading algos.
-
-4) Work on trading algos.
-
-5) Backend support for shorting stocks.
-
-6) Testing suite.
+3) Testing suite.
