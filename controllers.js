@@ -73,10 +73,50 @@ function currentPrice(symbol, priceCallBack) {
         }
         let priceInfo = JSON.parse(body)['Global Quote'];
         if (!priceInfo) {
-            priceCallBack(new Error('Invalid symbol.'), null);
+            priceCallBack(new Error('Invalid symbol: ' + symbol), null);
         } else {
             priceCallBack(null, priceInfo['05. price'];
         }
+    });
+}
+
+module.exports.updatePrices = function () {
+    let done = []
+    function update () {
+        db.getConn(function (err, conn) {
+            if (err) {
+                throw err;
+            }
+            conn.query(
+                'SELECT symbol FROM stocks GROUP BY symbol;',
+                function (err, results, fields) {
+                    if (err) {
+                        throw err;
+                    }
+                    if (results.length === done.length) {
+                        done = []
+                    }
+                    for (var row in results) {
+                        if (!done.includes(row.id)) {
+                            done.push(row.id);
+                            currentPrice(row.id, function (err, price) {
+                                if (err) {
+                                    throw err;
+                                }
+                                conn.query(
+                                    'UPDATE stocks'+
+                                    'SET price=?'+
+                                    'WHERE symbol=?',
+                                    [price, row.id],
+                                    errorHandle
+                                );
+                                setTimeout(() => update(), 20000);
+                            });
+                        }
+                    }
+                }
+            );
+        });
     });
 }
 
