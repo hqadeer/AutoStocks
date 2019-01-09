@@ -17,7 +17,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(session({
     secret: 'hobbs',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: true
 }));
 app.use(flash());
 app.use(passport.initialize());
@@ -34,10 +34,11 @@ passport.use('local-login', new LocalStrategy({
             if (err) {
                 return passBack(err);
             } else if (!user) {
-                return passBack(null, false, req.flash('message',
+                return passBack(null, false, req.flash('authMessage',
                                                        'Invalid username.'));
             } else if (!user.verify(password)) {
-                return passBack(null, false, req.flash('message', 'Oops! That '+
+                return passBack(null, false, req.flash('authMessage',
+                                                       'Oops! That '+
                                                        'password is '+
                                                        'incorrect!'));
             } else {
@@ -72,8 +73,7 @@ function isAuth (req, res, call) {
 
 // Routes
 app.get('/login', function (req, res) {
-    console.log(req.flash('loginMessage'));
-    res.render('login', { message: req.flash('loginMessage') });
+    res.render('login', { message: req.flash('authMessage') });
 });
 
 app.post('/login',

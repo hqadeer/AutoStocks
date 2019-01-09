@@ -13,7 +13,6 @@ block content
                     input(type='password', class='form-control', name='password', aria-describedby='password', placeholder='Password')
                 button(type='submit', class='btn btn-primary') Submit
             a(href='/signup') Don't have an account? Sign up.
+            if message
+                p(class='text-danger pt-3') #{message}
         div(class='col-4')
-    if message
-        div 
-            p #{message}
