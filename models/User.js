@@ -31,11 +31,10 @@ module.exports.register = function (username, password, regCallback) {
             'SELECT * FROM users WHERE ID=?', [username],
             function (error, results, fields) {
                 if (error) {
-                    console.log(error);
+                    throw err;
                 }
                 if (results.length > 0) {
-                    regCallback(new Error('Invalid username'),
-                                'Username is taken');
+                    regCallback(null, null);
                 } else {
                     hash (password, function (username, salt, hash) {
                         conn.query(
@@ -44,12 +43,13 @@ module.exports.register = function (username, password, regCallback) {
                             [username, salt, hash],
                             function (error, results, fields) {
                                 if (error) {
-                                    console.log(error);
+                                    regCallback(error)
+                                } else {
+                                    regCallback(null, new User(results[0]))
                                 }
                             }
                         );
                     });
-                    regCallback(null, `Registered user ${username}`);
                 }
             }
         );

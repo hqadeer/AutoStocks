@@ -27,8 +27,8 @@ app.set("views", path.join(__dirname, "views"))
 
 // Passport configuration
 
-passport.use('local-login', new LocalStrategy({
-    passReqToCallback: true },
+passport.use('local-login', new LocalStrategy(
+    { passReqToCallback: true },
     function (req, username, password, passBack) {
         User.findUser(username, function (err, user) {
             if (err) {
@@ -48,7 +48,23 @@ passport.use('local-login', new LocalStrategy({
     }
 ));
 
-passport.use('local-signup', new LocalStrategy(User.register));
+passport.use('local-signup', new LocalStrategy(
+    { passReqToCallback: true },
+    function (req, username, password, done) {
+        User.register(username, password, function (err, user) {
+            if (err) {
+                return done(err)
+            } else if (!user) {
+                return done(null, false, req.flash('authMessage',
+                                                   'Username is taken.')
+                );
+            } else {
+                return done(null, user)
+            }
+        })
+    }
+));
+
 
 passport.serializeUser(function(user, done) {
   done(null, user);
@@ -83,7 +99,7 @@ app.post('/login',
 );
 
 app.get('/signup', function (req, res) {
-    res.render('signup', { message: req.flash('loginMessage') });
+    res.render('signup', { message: req.flash('authMessage') });
 })
 
 app.post('/signup',
