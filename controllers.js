@@ -106,7 +106,7 @@ module.exports.updatePrices = function () {
                                 conn.query(
                                     'UPDATE stocks'+
                                     'SET price=?'+
-                                    'WHERE symbol=?',
+                                    'WHERE symbol=?;',
                                     [price, row.id],
                                     errorHandle
                                 );
