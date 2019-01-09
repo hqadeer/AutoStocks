@@ -14,5 +14,7 @@ block content
                 button(type='submit', class='btn btn-primary', id='submit') Submit
             a(href='/login') Have an account? Log In.
             if message
-                div(class='text-danger pt-3 text-center') #{message}
+                p(class='text-danger pt-3 text-center') #{message}
         div(class='col-4')
+block scripts
+    script(src='scripts/formcheck.js')
