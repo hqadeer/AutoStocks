@@ -4,14 +4,14 @@ block content
     h2(class='text-center pt-5 pb-1') Sign Up
     div(class='row')
         div(class='col-4')
-        div(class='col-4')
+        div(class='col-4', id='contentdiv')
             form(class='form justify-content-center', action='signup', method='POST')
                 div(class='form-group')
                     label(for='username') Username:
                     input(type="text", class="form-control mb-3", name="username", aria-describedby="username", placeholder="Enter username")
                     label(for='password') Password:
                     input(type='password', class='form-control', name='password', aria-describedby='password', placeholder='Password')
-                button(type='submit', class='btn btn-primary') Submit
+                button(type='submit', class='btn btn-primary', id='submit') Submit
             a(href='/login') Have an account? Log In.
             if message
                 div(class='text-danger pt-3 text-center') #{message}
