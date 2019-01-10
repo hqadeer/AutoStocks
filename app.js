@@ -114,16 +114,6 @@ app.get('/logout', function (req, res){
     });
 });
 
-app.post('/checkprice', isAuth, function (req, res) {
-    console.log(req.body)
-    theSymbol = req.body.symbol
-    backend.getCurrentPrice(req.body.symbol, function (price, symbol) {
-        thePrice = price;
-        res.render('main', {cost: price});
-    })
-     // with price displayed
-});
-
 app.post('/buy', isAuth, function (req, res) {
     backend.buy(req.user.id, theSymbol, thePrice, req.body.number,
         function (err, msg) {
