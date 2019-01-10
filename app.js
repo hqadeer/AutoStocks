@@ -137,7 +137,21 @@ app.post('/sell', isAuth, function (req, res) {
 });
 
 app.get('/', isAuth, function (req, res) {
-    res.render('main.pug');
+    db.getConn(function (err, conn) {
+        if (err) {
+            throw err;
+        }
+        conn.query(
+            'SELECT balance FROM users WHERE ID=?', [req.user.id],
+            function (err, results, fields) {
+                if (err) {
+                    throw err;
+                }
+                res.render('main.pug',
+                           { balance: results[0].balance.toFixed(2) });
+            }
+        );
+    });
 });
 
 app.listen(4800, function () {

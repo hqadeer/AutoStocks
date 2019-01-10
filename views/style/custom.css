@@ -6,3 +6,9 @@
   width: 100%;
   text-align: center;
 }
+
+.at-the-top-right-corner {
+    position: fixed;
+    top: 10%;
+    font-size: 130%;
+}

@@ -9,7 +9,12 @@ block content
                 div(class='form-group')
                     input(type="text", class="form-control", id="symbol", aria-describedby="symbol", placeholder="Enter stock symbol" required)
                 button(type='submit', class='btn btn-primary') Submit 
-        div(class='col-4')
+        if balance
+            div(class='col-2')
+            div(class='col-2')
+                p(class='text-center text-primary at-the-top-right-corner') Balance: $#{balance}
+        else
+            div(class='col-4')
 
 block scripts 
     script(src='js/stockinfo.js')
