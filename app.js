@@ -152,5 +152,6 @@ app.get('/', isAuth, function (req, res) {
 
 app.listen(4800, function () {
     db.init();
+    backend.updatePrices();
     console.log('listening on port 4800');
 });

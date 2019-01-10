@@ -95,6 +95,7 @@ function currentPrice(symbols, priceCallBack) {
 
 module.exports.updatePrices = function () {
     function update () {
+        console.log('updating')
         db.getConn(function (err, conn) {
             errorHandle(err);
             conn.query(
