@@ -64,19 +64,33 @@ function getData(symbol, options, callback) {
     getURL(inner);
 }
 
-function currentPrice(symbol, priceCallBack) {
-    let base = 'https://www.alphavantage.co/query?function='
-    URL = base + `GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiKey}`;
-    request(URL, function(err, response, body) {
+function currentPrice(symbols, priceCallBack) {
+    // Takes a list of stock symbols and results a list of their latest prices.
+
+    symbolUrl = symbols[0]
+    for (var symbol of symbols.slice(1)) {
+        symbolUrl += `,${symbol}`
+    }
+    let Url = `https://api.iextrading.com/1.0/stock/market/batch?symbols`+
+              `=${symbolUrl}&types=quote&filter=latestPrice`
+    request(Url, function(err, response, body) {
         if (err) {
             throw err;
         }
-        console.log(JSON.parse(body));
-        let priceInfo = JSON.parse(body)['Global Quote'];
-        if (!priceInfo) {
-            priceCallBack(new Error('Invalid symbol: ' + symbol), null);
+        let info = JSON.parse(body);
+        let acceptedSymbols = Object.keys(info);
+        if (acceptedSymbols.length < symbols.length) {
+            wrongSymbols = []
+            for (var symbol of symbols) {
+                if (!acceptedSymbols.includes(symbol.toUpperCase())) {
+                    wrongSymbols.push(symbol);
+                }
+            }
+            priceCallBack(new Error('Invalid symbol(s): ' + wrongSymbols),
+                          null);
         } else {
-            priceCallBack(null, priceInfo['05. price']);
+            let vals = acceptedSymbols.map(key => info[key].quote.latestPrice);
+            priceCallBack(null, vals);
         }
     });
 }
