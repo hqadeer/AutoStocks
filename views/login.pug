@@ -8,11 +8,13 @@ block content
             form(class='form justify-content-center', action='login', method='POST')
                 div(class='form-group')
                     label(for='username') Username:
-                    input(type="text", class="form-control mb-3", name="username", aria-describedby="username", placeholder="Enter username")
+                    input(type="text", class="form-control mb-3", name="username", aria-describedby="username", placeholder="Enter username", required)
                     label(for='password') Password:
-                    input(type='password', class='form-control', name='password', aria-describedby='password', placeholder='Password')
+                    input(type='password', class='form-control', name='password', aria-describedby='password', placeholder='Password', required)
                 button(type='submit', class='btn btn-primary', id='submit') Submit
             a(href='/signup') Don't have an account? Sign up.
             if message
                 p(class='text-danger pt-3 text-center') #{message}
         div(class='col-4')
+block scripts
+    script(src='js/formcheck.js')

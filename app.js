@@ -12,7 +12,7 @@ const flash = require('connect-flash')
 const app = express()
 
 // Configuration, some code borrowed from Passport docs
-app.use(express.static('public'));
+app.use(express.static('views'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(session({
     secret: 'hobbs',
@@ -151,6 +151,6 @@ app.get('/', isAuth, function (req, res) {
 });
 
 app.listen(4800, function () {
-    db.init()
+    db.init();
     console.log('listening on port 4800');
 });

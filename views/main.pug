@@ -5,7 +5,7 @@ block content
     div(class='container-fluid pt-3')
         form(class='form-inline justify-content-center', action='checkprice', method='POST')
             div(class='form-group')
-                input(type="text", class="form-control", name="symbol", aria-describedby="symbol", placeholder="Enter stock symbol")
+                input(type="text", class="form-control", name="symbol", aria-describedby="symbol", placeholder="Enter stock symbol" required)
             button(type='submit', class='btn btn-primary', id='submit') Submit
     if cost
         div(class='container')

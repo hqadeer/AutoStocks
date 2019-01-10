@@ -66,16 +66,17 @@ function getData(symbol, options, callback) {
 
 function currentPrice(symbol, priceCallBack) {
     let base = 'https://www.alphavantage.co/query?function='
-    URL = base + `GLOBAL_QUOTES&symbol=${symbol}&apikey=${apiKey}`;
+    URL = base + `GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiKey}`;
     request(URL, function(err, response, body) {
         if (err) {
             throw err;
         }
+        console.log(JSON.parse(body));
         let priceInfo = JSON.parse(body)['Global Quote'];
         if (!priceInfo) {
             priceCallBack(new Error('Invalid symbol: ' + symbol), null);
         } else {
-            priceCallBack(null, priceInfo['05. price'];
+            priceCallBack(null, priceInfo['05. price']);
         }
     });
 }
@@ -83,6 +84,7 @@ function currentPrice(symbol, priceCallBack) {
 module.exports.updatePrices = function () {
     let done = []
     function update () {
+        console.log('updating')
         db.getConn(function (err, conn) {
             if (err) {
                 throw err;
@@ -91,33 +93,31 @@ module.exports.updatePrices = function () {
                 'SELECT symbol FROM stocks GROUP BY symbol;',
                 function (err, results, fields) {
                     if (err) {
-                        throw err;
+                        console.log(err)
                     }
                     if (results.length === done.length) {
                         done = []
                     }
                     for (var row in results) {
-                        if (!done.includes(row.id)) {
-                            done.push(row.id);
-                            currentPrice(row.id, function (err, price) {
+                        if (!done.includes(row.symbol)) {
+                            done.push(row.symbol);
+                            currentPrice(row.symbol, function (err, price) {
                                 if (err) {
                                     throw err;
                                 }
                                 conn.query(
-                                    'UPDATE stocks'+
-                                    'SET price=?'+
-                                    'WHERE symbol=?;',
-                                    [price, row.id],
+                                    'UPDATE stocks SET price=? WHERE symbol=?;',
+                                    [price, row.symbol],
                                     errorHandle
                                 );
-                                setTimeout(() => update(), 20000);
                             });
                         }
                     }
                 }
             );
         });
-    });
+    }
+    setInterval(update, 5000)
 }
 
 function buy (id, stock, price, shares, buyCallBack) {
