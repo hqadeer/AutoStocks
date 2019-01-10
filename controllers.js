@@ -74,9 +74,7 @@ function currentPrice(symbols, priceCallBack) {
     let Url = `https://api.iextrading.com/1.0/stock/market/batch?symbols`+
               `=${symbolUrl}&types=quote&filter=latestPrice`
     request(Url, function(err, response, body) {
-        if (err) {
-            throw err;
-        }
+        errorHandle(err);
         let info = JSON.parse(body);
         let acceptedSymbols = Object.keys(info);
         if (acceptedSymbols.length < symbols.length) {
@@ -96,49 +94,37 @@ function currentPrice(symbols, priceCallBack) {
 }
 
 module.exports.updatePrices = function () {
-    let done = []
     function update () {
-        console.log('updating')
         db.getConn(function (err, conn) {
-            if (err) {
-                throw err;
-            }
+            errorHandle(err);
             conn.query(
                 'SELECT symbol FROM stocks GROUP BY symbol;',
                 function (err, results, fields) {
-                    if (err) {
-                        console.log(err)
-                    }
-                    if (results.length === done.length) {
-                        done = []
-                    }
-                    for (var row in results) {
-                        if (!done.includes(row.symbol)) {
-                            done.push(row.symbol);
-                            currentPrice(row.symbol, function (err, price) {
-                                if (err) {
-                                    throw err;
-                                }
-                                conn.query(
-                                    'UPDATE stocks SET price=? WHERE symbol=?;',
-                                    [price, row.symbol],
-                                    errorHandle
-                                );
-                            });
+                    errorHandle(err);
+                    let symbols = results.map(row => row.symbol);
+                    currentPrice(symbols, function (err, prices) {
+                        if (err) {
+                            throw err;
                         }
-                    }
+                        for (var i in symbols) {
+                            // i is the index
+                            conn.query(
+                                'UPDATE stocks SET price=? WHERE symbol=?',
+                                [prices[i], symbols[i]],
+                                errorHandle
+                            );
+                        }
+                    });
                 }
             );
         });
     }
-    setInterval(update, 5000)
+    setInterval(update, 10000)
 }
 
 function buy (id, stock, price, shares, buyCallBack) {
     db.getConn(function (err, conn) {
-        if (err) {
-            throw err;
-        }
+        errorHandle(err)
         conn.query(
             'SELECT balance FROM users WHERE id = ?;',
             [id],
@@ -199,9 +185,7 @@ function buy (id, stock, price, shares, buyCallBack) {
 
 function sell (id, symbol, price, number, sellCallBack) {
     db.getConn(function (err, conn) {
-        if (err) {
-            throw err;
-        }
+        errorHandle(err)
         conn.query(
             'SELECT number FROM stocks WHERE ID=? AND symbol=?;',
             [id, symbol],
