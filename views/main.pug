@@ -2,20 +2,13 @@ extends ./parent.pug
 
 block content
     h2(class='text-center pt-5 pb-1') Stock Lookup
-    div(class='container-fluid pt-3')
-        form(class='form-inline justify-content-center', action='checkprice', method='POST')
-            div(class='form-group')
-                input(type="text", class="form-control", name="symbol", aria-describedby="symbol", placeholder="Enter stock symbol" required)
-            button(type='submit', class='btn btn-primary', id='submit') Submit 
-    if cost
-        div(class='container')
-            p Price per share: #{cost}
-        div(class='container')
-            form(action='buyorsell', method='POST')
-                p Number of shares:
-                input(type='text', name='number', value='')
-                input(type='submit', formaction='buy', value='Buy')
-                input(type='submit', formaction='sell', value='Sell')
-    if message 
-        p #{message}
+    div(class='row')
+        div(class='col-4')
+        div(class='col-4', id='contentdiv')
+            form(class='form-inline justify-content-center', action='checkprice', method='POST')
+                div(class='form-group')
+                    input(type="text", class="form-control", name="symbol", aria-describedby="symbol", placeholder="Enter stock symbol" required)
+                button(type='submit', class='btn btn-primary', id='submit') Submit 
+        div(class='col-4')
+    
     
