@@ -10,6 +10,7 @@
 .at-the-top-right-corner {
     position: fixed;
     top: 10%;
+    right: 1%;
     font-size: 130%;
 }
 
