@@ -119,12 +119,12 @@ app.post('/buy', isAuth, function (req, res) {
 })
 
 app.post('/sell', isAuth, function (req, res) {
-    backend.sell(req.user.id, theSymbol, thePrice, req.body.number,
-        function (err, msg) {
+    backend.sell(req.user.id, req.body.symbol, req.body.price, req.body.number,
+        function (err, msg, balance, failed) {
             if (err) {
                 throw err;
             }
-            res.render('main', {cost: thePrice, message: msg});
+            res.json({ message: msg, balance: balance, failed: failed });
         }
     );
 });

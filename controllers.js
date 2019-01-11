@@ -133,8 +133,9 @@ function buy (id, stock, price, shares, buyCallBack) {
                 if (error) {
                     buyCallBack(error, null)
                 }
-                if ((price * shares) > results[0].balance) {
-                    buyCallBack(null, 'Insufficient funds.');
+                let balance = results[0].balance;
+                if ((price * shares) > balance) {
+                    buyCallBack(null, 'Insufficient funds.', balance, true);
                 } else {
                     conn.query(
                         'UPDATE users \
@@ -174,8 +175,9 @@ function buy (id, stock, price, shares, buyCallBack) {
                                     errorHandle
                                 );
                             }
-                            buyCallBack(null, `Purchased ${shares} shares of`+
-                                              ` ${stock} @ $${price}`);
+                            let msg = `Purchased ${shares} shares of ${stock}`+
+                                      ` @ $${price}`
+                            buyCallBack(null, msg, balance - price * shares);
                         }
                     );
                 }
@@ -194,46 +196,49 @@ function sell (id, symbol, price, number, sellCallBack) {
                 if (error) {
                     sellCallBack(error, null)
                 }
-                if (results[0].number < number) {
-                    sellCallBack(null, 'Insufficient shares');
-                } else {
-                    conn.query(
-                        'UPDATE users \
-                        SET balance = balance + ? \
-                        WHERE id = ?;',
-                        [price * number, id],
-                        errorHandle
-                    );
-                    conn.query(
-                        'INSERT INTO history VALUES ( \
-                            ?, ?, ?, ?, "sell");',
-                        [id, symbol, number, price],
-                        errorHandle
-                    );
-                    if (results[0].number > number) {
+                conn.query('SELECT balance FROM users WHERE ID=?', [id],
+                function (e, r, f) {
+                    let bal = r[0].balance;
+                    if (results[0].number < number) {
+                        sellCallBack(null, 'Insufficient shares.', bal, true);
+                    } else {
                         conn.query(
-                            'UPDATE stocks \
-                            SET number = number - ? \
-                            WHERE ID=? AND symbol=?;',
-                            [number, id, symbol],
+                            'UPDATE users \
+                            SET balance = balance + ? \
+                            WHERE id = ?;',
+                            [price * number, id],
                             errorHandle
                         );
-                    } else if (results[0].number === number) {
                         conn.query(
-                            'DELETE FROM stocks WHERE ID=? AND symbol=?',
-                            [id, symbol],
+                            'INSERT INTO history VALUES ( \
+                                ?, ?, ?, ?, "sell");',
+                            [id, symbol, number, price],
                             errorHandle
                         );
+                        if (results[0].number > number) {
+                            conn.query(
+                                'UPDATE stocks \
+                                SET number = number - ? \
+                                WHERE ID=? AND symbol=?;',
+                                [number, id, symbol],
+                                errorHandle
+                            );
+                        } else if (results[0].number === number) {
+                            conn.query(
+                                'DELETE FROM stocks WHERE ID=? AND symbol=?',
+                                [id, symbol],
+                                errorHandle
+                            );
+                        }
+                        let msg = `Sold ${number} shares of ${symbol} @`+
+                                  ` $${price.toFixed(2)}`;
+                        sellCallBack(null, msg, bal + price * number);
                     }
-                    sellCallBack(null, `Sold ${number} shares of ${symbol} @` +
-                                       ` $${price}`);
-                }
+                })
             }
         );
     });
 }
 
-// todo: background database updates for price every 15 mins
 // todo: (frontend): representing database in html table
-// todo: (frontend): aesthetic improvements with bootstrap
 // todo: write custom requests for python wrapper

@@ -34,34 +34,34 @@ $(function () {
             }
         });
     });
+    function buysell (event, type) {
+        evt.preventDefault();
+        let number = $('#shares').val();
+        $('#row2').empty();
+        $('#row2').removeClass('text-info');
+        $('#row2').removeClass('text-danger');
+        $('#row2').removeClass('slightly-larger');
+        $('#form2').empty();
+        $.ajax({
+            url: `http://localhost:4800/${type}`,
+            type: 'POST',
+            data: { shares: number, price: price, symbol: symbol },
+            dataType: 'json',
+            success: function (data) {
+                if (data.failed) {
+                    $('#row2').addClass('text-danger');
+                } else {
+                    $('#row2').addClass('text-info');
+                }
+                $('#row2').append(data.message);
+                $('#balance').val(data.balance);
+            },
+            error: function (req, error) {
+                $('#row2').addClass('text-danger');
+                $('#row2').append('An error occurred.');
+            }
+        });
+    }
     $(document).on('submit', '#buy', evt => buysell(evt, "buy"));
     $(document).on('submit', '#sell', evt => buysell(evt, "sell"));
 });
-
-function buysell (event, type) {
-    evt.preventDefault();
-    let number = $('#shares').val();
-    $('#row2').empty();
-    $('#row2').removeClass('text-info');
-    $('#row2').removeClass('text-danger');
-    $('#row2').removeClass('slightly-larger');
-    $('#form2').empty();
-    $.ajax({
-        url: `http://localhost:4800/${type}`,
-        type: 'POST',
-        dataType: 'json',
-        success: function (data) {
-            if (data.failed) {
-                $('#row2').addClass('text-danger');
-            } else {
-                $('#row2').addClass('text-info');
-            }
-            $('#row2').append(data.message);
-            $('#balance').val(data.balancee);
-        },
-        error: function (req, error) {
-            $('#row2').addClass('text-danger');
-            $('#row2').append('An error occurred.');
-        }
-    });
-}
