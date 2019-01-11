@@ -175,8 +175,8 @@ function buy (id, stock, price, shares, buyCallBack) {
                                     errorHandle
                                 );
                             }
-                            let msg = `Purchased ${shares} shares of ${stock}`+
-                                      ` @ $${price}`
+                            let msg = `Purchased ${shares} shares of `+
+                                      `${stock.toUpperCase()} @ $${price}.`
                             buyCallBack(null, msg, balance - price * shares);
                         }
                     );
@@ -187,17 +187,21 @@ function buy (id, stock, price, shares, buyCallBack) {
 }
 
 function sell (id, symbol, price, number, sellCallBack) {
+    console.log('selling');
     db.getConn(function (err, conn) {
         errorHandle(err)
         conn.query(
             'SELECT number FROM stocks WHERE ID=? AND symbol=?;',
             [id, symbol],
             function (error, results, fields) {
+                console.log('1');
                 if (error) {
                     sellCallBack(error, null)
                 }
-                conn.query('SELECT balance FROM users WHERE ID=?', [id],
+                conn.query('SELECT balance FROM users WHERE ID=?;', [id],
                 function (e, r, f) {
+                    console.log('2');
+                    errorHandle(e);
                     let bal = r[0].balance;
                     if (results[0].number < number) {
                         sellCallBack(null, 'Insufficient shares.', bal, true);
@@ -230,8 +234,8 @@ function sell (id, symbol, price, number, sellCallBack) {
                                 errorHandle
                             );
                         }
-                        let msg = `Sold ${number} shares of ${symbol} @`+
-                                  ` $${price.toFixed(2)}`;
+                        let msg = `Sold ${number} shares of `+
+                                  `${symbol.toUpperCase()} @ $${price}.`;
                         sellCallBack(null, msg, bal + price * number);
                     }
                 })

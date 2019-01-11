@@ -2,11 +2,14 @@ $(function () {
     let price, symbol;
     $('#symbol-form').submit(function (evt) {
         evt.preventDefault();
-        symbol = [$('#symbol').val()];
+        symbol = $('#symbol').val();
         let Url = `https://api.iextrading.com/1.0/stock/${symbol}`+
                   `/quote?filter=latestPrice`;
         $('#price').remove();
-        $('#row2').addClass('slightly-larger')
+        $('#row2').empty();
+        $('#row2').removeClass('text-info');
+        $('#row2').removeClass('text-danger');
+        $('#row2').addClass('slightly-larger');
         $.ajax({
             url: Url,
             type: 'GET',
@@ -35,7 +38,7 @@ $(function () {
         });
     });
     function buysell (event, type) {
-        evt.preventDefault();
+        event.preventDefault();
         let number = $('#shares').val();
         $('#row2').empty();
         $('#row2').removeClass('text-info');
@@ -45,7 +48,7 @@ $(function () {
         $.ajax({
             url: `http://localhost:4800/${type}`,
             type: 'POST',
-            data: { shares: number, price: price, symbol: symbol },
+            data: { number: number, price: price, symbol: symbol },
             dataType: 'json',
             success: function (data) {
                 if (data.failed) {
@@ -54,7 +57,7 @@ $(function () {
                     $('#row2').addClass('text-info');
                 }
                 $('#row2').append(data.message);
-                $('#balance').val(data.balance);
+                $('#balance').text('$'+data.balance.toFixed(2));
             },
             error: function (req, error) {
                 $('#row2').addClass('text-danger');
@@ -62,6 +65,6 @@ $(function () {
             }
         });
     }
-    $(document).on('submit', '#buy', evt => buysell(evt, "buy"));
-    $(document).on('submit', '#sell', evt => buysell(evt, "sell"));
+    $(document).on('click', '#buy', evt => buysell(evt, "buy"));
+    $(document).on('click', '#sell', evt => buysell(evt, "sell"));
 });
