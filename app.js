@@ -53,13 +53,13 @@ passport.use('local-signup', new LocalStrategy(
     function (req, username, password, done) {
         User.register(username, password, function (err, user) {
             if (err) {
-                return done(err)
+                return done(err);
             } else if (!user) {
                 return done(null, false, req.flash('authMessage',
                                                    'Username is taken.')
                 );
             } else {
-                return done(null, user)
+                return done(null, user);
             }
         })
     }
@@ -67,7 +67,7 @@ passport.use('local-signup', new LocalStrategy(
 
 
 passport.serializeUser(function(user, done) {
-  done(null, user);
+    done(null, { id: user.id });
 });
 
 passport.deserializeUser(function(user, done) {
@@ -114,38 +114,39 @@ app.get('/logout', function (req, res){
     });
 });
 
-app.post('/buy', isAuth, function (req, res) {
+app.post('/buy', isAuth, function (req, res, next) {
     backend.buy(req.user.id, req.body.symbol, req.body.price, req.body.number,
         function (err, msg, balance, failed) {
             if (err) {
-                throw err;
+                next(err);
             }
             res.json({ message: msg, balance: balance, failed: failed });
         }
     );
 })
 
-app.post('/sell', isAuth, function (req, res) {
+app.post('/sell', isAuth, function (req, res, next) {
     backend.sell(req.user.id, req.body.symbol, req.body.price, req.body.number,
         function (err, msg, balance, failed) {
             if (err) {
-                throw err;
+                next(err);
             }
             res.json({ message: msg, balance: balance, failed: failed });
         }
     );
 });
 
-app.get('/', isAuth, function (req, res) {
+app.get('/', isAuth, function (req, res, next) {
+    console.log(req.user)
     db.getConn(function (err, conn) {
         if (err) {
-            throw err;
+            next(err);
         }
         conn.query(
             'SELECT balance FROM users WHERE ID=?', [req.user.id],
             function (err, results, fields) {
                 if (err) {
-                    throw err;
+                    next(err);
                 }
                 res.render('main.pug',
                            { balance: results[0].balance.toFixed(2) });

@@ -16,7 +16,7 @@ module.exports.init = function initDatabase () {
             ID varchar(255) UNIQUE NOT NULL, \
             salt varchar(255) NOT NULL, \
             hash TEXT NOT NULL, \
-            balance numeric DEFAULT 100000, \
+            balance numeric DEFAULT 100000.00, \
             PRIMARY KEY (ID) \
         );',
         errorHandle

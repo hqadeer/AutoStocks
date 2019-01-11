@@ -45,7 +45,12 @@ module.exports.register = function (username, password, regCallback) {
                                 if (error) {
                                     regCallback(error)
                                 } else {
-                                    regCallback(null, new User(results[0]))
+                                    let info = {
+                                        ID: username,
+                                        salt: salt,
+                                        hash: hash
+                                    }
+                                    regCallback(null, new User(info));
                                 }
                             }
                         );
