@@ -2,7 +2,7 @@ extends ./parent.pug
 
 block content
     h2(class='text-center pt-4 pb-4') Stock Lookup
-    p(class='text-primary at-the-top-right-corner') $#{balance}
+    p(class='text-primary at-the-top-right-corner' id='balance') $#{balance}
     div(class='container-fluid')
         div(class='row justify-content-center', id='row1')
             div(class='col-4-md col-6-sm', id='form1')
@@ -10,9 +10,10 @@ block content
                     div(class='form-group')
                         input(type="text", class="form-control", id="symbol", aria-describedby="symbol", placeholder="Enter stock symbol" required)
                     button(type='submit', class='btn btn-primary') Submit 
-        div(class='row justify-content-center text-info slightly-larger pt-4' id='row2')
+        div(class='row justify-content-center slightly-larger pt-4' id='row2')
         div(class='row justify-content-center', id='row3')
             div(class='col-4-md col-6-sm mt-2', id='form2')
+            
 
 block scripts 
     script(src='js/stockinfo.js')
