@@ -2,19 +2,21 @@ extends ./parent.pug
 
 block content
     h2(class='text-center pt-4 pb-4') Stock Lookup
-    div(class='row')
-        div(class='col-4')
-        div(class='col-4', id='contentdiv')
-            form(class='form-inline justify-content-center', id='symbol-form')
-                div(class='form-group')
-                    input(type="text", class="form-control", id="symbol", aria-describedby="symbol", placeholder="Enter stock symbol" required)
-                button(type='submit', class='btn btn-primary') Submit 
-        if balance
-            div(class='col-2')
-            div(class='col-2')
-                p(class='text-center text-primary at-the-top-right-corner') Balance: $#{balance}
-        else
+    div(class='container-fluid')
+        div(class='row', id='row1')
             div(class='col-4')
+            div(class='col-4', id='contentdiv')
+                form(class='form-inline justify-content-center', id='symbol-form')
+                    div(class='form-group')
+                        input(type="text", class="form-control", id="symbol", aria-describedby="symbol", placeholder="Enter stock symbol" required)
+                    button(type='submit', class='btn btn-primary') Submit 
+            if balance
+                div(class='col-2')
+                div(class='col-2')
+                    p(class='text-center text-primary at-the-top-right-corner') Balance: $#{balance}
+            else
+                div(class='col-4')
+        div(class='row justify-content-center text-info slightly-larger pt-4' id='row2')
 
 block scripts 
     script(src='js/stockinfo.js')

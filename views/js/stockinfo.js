@@ -4,17 +4,19 @@ $(function () {
         let symbol = [$('#symbol').val()]
         let Url = `https://api.iextrading.com/1.0/stock/${symbol}`+
                   `/quote?filter=latestPrice`
+        $('#price').remove();
         $.ajax({
             url: Url,
             type: 'GET',
             dataType: 'json',
             success: function (data) {
-                console.log(data);
+                let tag = `<p id='price'>Price: $${data.latestPrice}</p>`;
+                $('#row2').append(tag);
             },
             error: function (req, error) {
-                console.log(error);
+                let tag = `<p id='price'>Invalid symbol: "${symbol}"</p>`;
+                $('#row2').append(tag);
             }
         });
-        console.log(Url);
     });
 });
