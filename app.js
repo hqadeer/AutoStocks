@@ -115,7 +115,14 @@ app.get('/logout', function (req, res){
 });
 
 app.post('/buy', isAuth, function (req, res) {
-    console.log('buy')
+    backend.buy(req.user.id, req.body.symbol, req.body.price, req.body.number,
+        function (err, msg, balance, failed) {
+            if (err) {
+                throw err;
+            }
+            res.json({ message: msg, balance: balance, failed: failed });
+        }
+    );
 })
 
 app.post('/sell', isAuth, function (req, res) {
