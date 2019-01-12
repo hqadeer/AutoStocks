@@ -14,18 +14,20 @@ A Node.js web app to manage a virtual stock portfolio and provide API end-points
 
 4) Data storage (both for users and for stock portfolios) using MySQL.
 
-5) Effective tracking of current stock prices in database.
+5) Live tracking of current stock prices; accompanying display on main page.
+
+6) Working frontend; only graphs and insight additions (tbd) remain.
 
 ### In-Progress:
 
-1) Front-end work on aesthetics and interactivity using jQuery and bootstrap.
+1) API end-points and Python wrapper to test trading algos.
 
-2) Front-end work on graphs and tables to visually see portfolio and track balance.
-
-3) Work on trading algorithms.
+2) Work on trading algorithms.
 
 ### To-do:
 
-1) API end-points and Python wrapper to facilitate testing of trading algos.
+1) Testing suite.
 
-2) Testing suite.
+2) Graphs and other advanced front-end visuals.
+
+3) Security improvements (tbd)
