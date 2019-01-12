@@ -123,9 +123,37 @@ module.exports.updatePrices = function () {
     setInterval(update, 10000)
 }
 
+module.exports.genTable = function(id, callback) {
+    db.getConn(function (err, conn) {
+        if (err) {
+            callback(err, null);
+        }
+        conn.query(
+            'SELECT s.symbol, s.number, s.price, s.number * s.price as value,'+
+                'SUM(CASE WHEN h.action = "buy" THEN h.number * h.price'+
+                         'WHEN h.action = "sell" THEN -1 * h.number * h.price'+
+                         'ELSE 0'+
+                    'END) as investment,'+
+            'FROM stocks AS s INNER JOIN history AS h'+
+            'ON s.symbol = h.symbol AND s.ID = h.ID'+
+            'WHERE s.ID=?'+
+            'GROUP BY s.symbol'+
+            'ORDER BY value DESC;',
+            [id],
+            function (err, results, fields) {
+                if (err) {
+                    callback(err, null);
+                } else {
+                    callback(null, results);
+                }
+            }
+        );
+    });
+}
+
 function buy (id, stock, price, shares, buyCallBack) {
     db.getConn(function (err, conn) {
-        errorHandle(err)
+        errorHandle(err);
         conn.query(
             'SELECT balance FROM users WHERE id = ?;',
             [id],

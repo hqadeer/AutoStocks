@@ -123,7 +123,7 @@ app.post('/buy', isAuth, function (req, res, next) {
             res.json({ message: msg, balance: balance, failed: failed });
         }
     );
-})
+});
 
 app.post('/sell', isAuth, function (req, res, next) {
     backend.sell(req.user.id, req.body.symbol, req.body.price, req.body.number,
@@ -134,6 +134,15 @@ app.post('/sell', isAuth, function (req, res, next) {
             res.json({ message: msg, balance: balance, failed: failed });
         }
     );
+});
+
+app.post('/table', isAuth, function (req, res, next) {
+    backend.genTable(req.user.id, function (err, results) {
+        if (err) {
+            next(err);
+        }
+        res.json(results);
+    });
 });
 
 app.get('/', isAuth, function (req, res, next) {

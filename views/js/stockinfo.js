@@ -56,11 +56,12 @@ $(function () {
                               '</thead>'+
                               '<tbody>';
                 for (let row of data) {
-                    let tRow = '<tr>'
+                    let tRow = '<tr>';
                     for (let key of Object.keys(row)) {
                         tRow += `<td>${row[key]}</td>`;
                     }
-                    tRow += '</tr>';
+                    let roi = 100 * ((row.value - row.investment) / row.investment);
+                    tRow += `<td>${roi.toFixed(2)}%</td> </tr>`;
                     table += tRow;
                 }
                 table += '</tbody>'+
