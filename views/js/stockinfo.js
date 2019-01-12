@@ -43,35 +43,39 @@ $(function () {
             type: 'POST',
             dataType: 'json',
             success: function (data) {
-                let table = '<div class="container" id="table-container">'+
-                            '<table class="table table-striped">'+
-                              '<thead class="thead-dark">'+
-                                '<tr>'+
-                                  '<th scope="col">Stock</th>'+
-                                  '<th scope="col"># of Shares</th>'+
-                                  '<th scope="col">Current Price</th>'+
-                                  '<th scope="col">Value</th>'+
-                                  '<th scope="col">ROI</th>'+
-                                '</tr>'+
-                              '</thead>'+
-                              '<tbody>';
-                for (let row of data) {
-                    let tRow = '<tr>';
-                    for (let key of Object.keys(row)) {
-                        tRow += `<td>${row[key]}</td>`;
+                if (data.length > 0) {
+                    data.forEach(row => row.symbol = row.symbol.toUpperCase());
+                    let table = '<div class="container mt-5" id="table-container">'+
+                                '<table class="table table-striped">'+
+                                  '<thead>'+
+                                    '<tr>'+
+                                      '<th scope="col">Stock</th>'+
+                                      '<th scope="col"># of Shares</th>'+
+                                      '<th scope="col">Current Price</th>'+
+                                      '<th scope="col">Value</th>'+
+                                      '<th scope="col">Investment</th>'+
+                                      '<th scope="col">ROI</th>'+
+                                    '</tr>'+
+                                  '</thead>'+
+                                  '<tbody>';
+                    for (let row of data) {
+                        let tRow = '<tr>';
+                        for (let key of Object.keys(row)) {
+                            tRow += `<td>${row[key]}</td>`;
+                        }
+                        let roi = 100 * ((row.value - row.investment) / row.investment);
+                        tRow += `<td>${roi.toFixed(2)}%</td> </tr>`;
+                        table += tRow;
                     }
-                    let roi = 100 * ((row.value - row.investment) / row.investment);
-                    tRow += `<td>${roi.toFixed(2)}%</td> </tr>`;
-                    table += tRow;
+                    table += '</tbody>'+
+                             '</table>'+
+                             '</div>'
+                    $('#row4').empty();
+                    $('#row4').append(table);
                 }
-                table += '</tbody>'+
-                         '</table>'+
-                         '</div>'
-                $('#row4').empty();
-                $('#row4').append(table);
-            }
+            },
             error: function (req, error) {
-                $('#row4').addClass('text-danger');
+                $('#row4').addClass('text-danger pt-2');
                 $('#row4').append('<p>An error occurred while '+
                                   'loading the table.</p>');
             }
@@ -106,6 +110,7 @@ $(function () {
         });
         // call to drawTable here
     }
+    drawTable();
     $(document).on('click', '#buy', evt => buysell(evt, "buy"));
     $(document).on('click', '#sell', evt => buysell(evt, "sell"));
 });
