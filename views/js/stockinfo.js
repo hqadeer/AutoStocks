@@ -7,6 +7,7 @@ $(function () {
                   `/quote?filter=latestPrice`;
         $('#price').remove();
         $('#row2').empty();
+        $('#form2').empty();
         $('#row2').removeClass('text-info');
         $('#row2').removeClass('text-danger');
         $('#row2').addClass('slightly-larger');
@@ -44,8 +45,21 @@ $(function () {
             dataType: 'json',
             success: function (data) {
                 if (data.length > 0) {
-                    data.forEach(row => row.symbol = row.symbol.toUpperCase());
-                    let table = '<div class="container mt-5" id="table-container">'+
+                    // Formatting
+                    data.forEach(row => {
+                        row.roi = (100 * ((row.value - row.investment)
+                                          / row.investment)).toFixed(2) + '%';
+                        row.symbol = row.symbol.toUpperCase();
+                        for (e of ['price', 'value', 'investment']) {
+                            row[e] = '$' + row[e].toString();
+                            if (!row[e].includes('.')) {
+                                row[e] = row[e] + '.00';
+                            } else if (row[e].split('.')[1].length < 2) {
+                                row[e] = row[e] + '0';
+                            }
+                        }
+                    });
+                    let table = '<div class="container mt-3 table-responsive-sm scrollable-div" id="table-container">'+
                                 '<table class="table table-striped">'+
                                   '<thead>'+
                                     '<tr>'+
@@ -63,8 +77,7 @@ $(function () {
                         for (let key of Object.keys(row)) {
                             tRow += `<td>${row[key]}</td>`;
                         }
-                        let roi = 100 * ((row.value - row.investment) / row.investment);
-                        tRow += `<td>${roi.toFixed(2)}%</td> </tr>`;
+                        tRow += '</tr>';
                         table += tRow;
                     }
                     table += '</tbody>'+
