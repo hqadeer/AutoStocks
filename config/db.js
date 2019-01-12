@@ -16,7 +16,7 @@ module.exports.init = function initDatabase () {
             ID varchar(255) UNIQUE NOT NULL, \
             salt varchar(255) NOT NULL, \
             hash TEXT NOT NULL, \
-            balance numeric DEFAULT 100000.00, \
+            balance numeric(16, 2) UNSIGNED DEFAULT 100000.00, \
             PRIMARY KEY (ID) \
         );',
         errorHandle
@@ -26,7 +26,7 @@ module.exports.init = function initDatabase () {
             ID varchar(255), \
             symbol varchar(255), \
             number int, \
-            price numeric \
+            price numeric(16, 2) UNSIGNED \
         );',
         errorHandle
     );
@@ -35,7 +35,7 @@ module.exports.init = function initDatabase () {
             ID varchar(255), \
             symbol varchar(255), \
             number int, \
-            price numeric, \
+            price numeric(16, 2) UNSIGNED, \
             action varchar(255) \
         );',
         errorHandle
