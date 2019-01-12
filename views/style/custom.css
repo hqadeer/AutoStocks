@@ -17,3 +17,8 @@
 .slightly-larger {
     font-size: 130%;
 }
+
+.scrollable-div {
+    height: 40%;
+    overflow-y: auto;
+}
