@@ -225,16 +225,21 @@ function sell (id, symbol, price, number, sellCallBack) {
             'SELECT number FROM stocks WHERE ID=? AND symbol=?;',
             [id, symbol],
             function (error, results, fields) {
-                console.log('1');
                 if (error) {
                     sellCallBack(error, null)
                 }
                 conn.query('SELECT balance FROM users WHERE ID=?;', [id],
                 function (e, r, f) {
-                    console.log('2');
                     errorHandle(e);
                     let bal = r[0].balance;
-                    if (results[0].number < number) {
+                    if (number <= 0) {
+                        sellCallBack(null, 'Input must be a positive integer!',
+                                     bal, true);
+                    } else if (!results[0].hasOwnProperty('number')) {
+                        sellCallBack(null, 'You do not own any shares of '+
+                                           symbol.toUpperCase() +'!',
+                                     bal, true);
+                    } else if (results[0].number < number) {
                         sellCallBack(null, 'Insufficient shares.', bal, true);
                     } else {
                         conn.query(
@@ -260,7 +265,7 @@ function sell (id, symbol, price, number, sellCallBack) {
                             );
                         } else if (results[0].number === number) {
                             conn.query(
-                                'DELETE FROM stocks WHERE ID=? AND symbol=?',
+                                'DELETE FROM stocks WHERE ID=? AND symbol=?;',
                                 [id, symbol],
                                 errorHandle
                             );
