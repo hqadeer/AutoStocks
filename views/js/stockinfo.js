@@ -37,6 +37,45 @@ $(function () {
             }
         });
     });
+    function drawTable () {
+        $.ajax({
+            url: 'http://localhost:4800/table',
+            type: 'POST',
+            dataType: 'json',
+            success: function (data) {
+                let table = '<div class="container" id="table-container">'+
+                            '<table class="table table-striped">'+
+                              '<thead class="thead-dark">'+
+                                '<tr>'+
+                                  '<th scope="col">Stock</th>'+
+                                  '<th scope="col"># of Shares</th>'+
+                                  '<th scope="col">Current Price</th>'+
+                                  '<th scope="col">Value</th>'+
+                                  '<th scope="col">ROI</th>'+
+                                '</tr>'+
+                              '</thead>'+
+                              '<tbody>';
+                for (let row of data) {
+                    let tRow = '<tr>'
+                    for (let key of Object.keys(row)) {
+                        tRow += `<td>${row[key]}</td>`;
+                    }
+                    tRow += '</tr>';
+                    table += tRow;
+                }
+                table += '</tbody>'+
+                         '</table>'+
+                         '</div>'
+                $('#row4').empty();
+                $('#row4').append(table);
+            }
+            error: function (req, error) {
+                $('#row4').addClass('text-danger');
+                $('#row4').append('<p>An error occurred while '+
+                                  'loading the table.</p>');
+            }
+        });
+    }
     function buysell (event, type) {
         event.preventDefault();
         let number = $('#shares').val();
@@ -64,6 +103,7 @@ $(function () {
                 $('#row2').append('An error occurred.');
             }
         });
+        // call to drawTable here
     }
     $(document).on('click', '#buy', evt => buysell(evt, "buy"));
     $(document).on('click', '#sell', evt => buysell(evt, "sell"));
