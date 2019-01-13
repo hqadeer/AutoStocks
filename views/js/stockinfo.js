@@ -115,13 +115,13 @@ $(function () {
                 }
                 $('#row2').append(data.message);
                 $('#balance').text('$'+data.balance.toFixed(2));
+                drawTable();
             },
             error: function (req, error) {
                 $('#row2').addClass('text-danger');
                 $('#row2').append('An error occurred.');
             }
         });
-        // call to drawTable here
     }
     drawTable();
     $(document).on('click', '#buy', evt => buysell(evt, "buy"));

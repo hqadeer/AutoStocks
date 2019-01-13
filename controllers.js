@@ -232,7 +232,7 @@ function sell (id, symbol, price, number, sellCallBack) {
                     if (number <= 0) {
                         sellCallBack(null, 'Input must be a positive integer!',
                                      bal, true);
-                    } else if (!results[0].hasOwnProperty('number')) {
+                    } else if (results.length === 0) {
                         sellCallBack(null, 'You do not own any shares of '+
                                            symbol.toUpperCase() +'!',
                                      bal, true);
