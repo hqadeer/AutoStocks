@@ -44,6 +44,7 @@ $(function () {
             type: 'POST',
             dataType: 'json',
             success: function (data) {
+                console.log('drawing table');
                 if (data.length > 0) {
                     // Formatting
                     data.forEach(row => {
@@ -85,6 +86,8 @@ $(function () {
                              '</div>'
                     $('#row4').empty();
                     $('#row4').append(table);
+                } else {
+                    $('#row4').empty();
                 }
             },
             error: function (req, error) {
@@ -115,7 +118,8 @@ $(function () {
                 }
                 $('#row2').append(data.message);
                 $('#balance').text('$'+data.balance.toFixed(2));
-                drawTable();
+                console.log('here');
+                setTimeout(drawTable, 500);
             },
             error: function (req, error) {
                 $('#row2').addClass('text-danger');
