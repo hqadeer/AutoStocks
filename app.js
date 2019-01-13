@@ -115,7 +115,10 @@ app.get('/logout', function (req, res){
 });
 
 app.post('/buy', isAuth, function (req, res, next) {
-    backend.buy(req.user.id, req.body.symbol, req.body.price, req.body.number,
+    console.log('buy');
+    let price = parseFloat(req.body.price, 10);
+    let number = parseFloat(req.body.number, 10);
+    backend.buy(req.user.id, req.body.symbol, price, number,
         function (err, msg, balance, failed) {
             if (err) {
                 next(err);
@@ -126,7 +129,10 @@ app.post('/buy', isAuth, function (req, res, next) {
 });
 
 app.post('/sell', isAuth, function (req, res, next) {
-    backend.sell(req.user.id, req.body.symbol, req.body.price, req.body.number,
+    console.log('sell');
+    let price = parseFloat(req.body.price, 10);
+    let number = parseFloat(req.body.number, 10);
+    backend.sell(req.user.id, req.body.symbol, price, number,
         function (err, msg, balance, failed) {
             if (err) {
                 next(err);
@@ -137,6 +143,7 @@ app.post('/sell', isAuth, function (req, res, next) {
 });
 
 app.post('/table', isAuth, function (req, res, next) {
+    console.log('table');
     backend.genTable(req.user.id, function (err, results) {
         if (err) {
             next(err);
@@ -146,7 +153,7 @@ app.post('/table', isAuth, function (req, res, next) {
 });
 
 app.get('/', isAuth, function (req, res, next) {
-    console.log(req.user)
+    console.log('home');
     db.getConn(function (err, conn) {
         if (err) {
             next(err);
@@ -154,6 +161,7 @@ app.get('/', isAuth, function (req, res, next) {
         conn.query(
             'SELECT balance FROM users WHERE ID=?', [req.user.id],
             function (err, results, fields) {
+                conn.release();
                 if (err) {
                     next(err);
                 }

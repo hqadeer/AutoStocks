@@ -101,7 +101,6 @@ module.exports.updatePrices = function () {
             conn.query(
                 'SELECT symbol FROM stocks GROUP BY symbol;',
                 function (err, results, fields) {
-                    errorHandle(err);
                     let symbols = results.map(row => row.symbol);
                     currentPrice(symbols, function (err, prices) {
                         if (err) {
@@ -116,6 +115,8 @@ module.exports.updatePrices = function () {
                             );
                         }
                     });
+                    conn.release();
+                    errorHandle(err);
                 }
             );
         });
@@ -124,7 +125,6 @@ module.exports.updatePrices = function () {
 }
 
 module.exports.genTable = function(id, callback) {
-    console.log('here')
     db.getConn(function (err, conn) {
         if (err) {
             callback(err, null);
@@ -142,8 +142,7 @@ module.exports.genTable = function(id, callback) {
             'ORDER BY value DESC;',
             [id],
             function (err, results, fields) {
-                console.log(err);
-                console.log(results);
+                conn.release();
                 if (err) {
                     callback(err, null);
                 } else {
@@ -161,9 +160,6 @@ function buy (id, stock, price, shares, buyCallBack) {
             'SELECT balance FROM users WHERE id = ?;',
             [id],
             function (error, results, fields) {
-                if (error) {
-                    buyCallBack(error, null)
-                }
                 let balance = results[0].balance;
                 if ((price * shares) > balance) {
                     buyCallBack(null, 'Insufficient funds.', balance, true);
@@ -212,6 +208,10 @@ function buy (id, stock, price, shares, buyCallBack) {
                         }
                     );
                 }
+                conn.release();
+                if (error) {
+                    buyCallBack(error, null)
+                }
             }
         );
     });
@@ -225,9 +225,6 @@ function sell (id, symbol, price, number, sellCallBack) {
             'SELECT number FROM stocks WHERE ID=? AND symbol=?;',
             [id, symbol],
             function (error, results, fields) {
-                if (error) {
-                    sellCallBack(error, null)
-                }
                 conn.query('SELECT balance FROM users WHERE ID=?;', [id],
                 function (e, r, f) {
                     errorHandle(e);
@@ -274,11 +271,14 @@ function sell (id, symbol, price, number, sellCallBack) {
                                   `${symbol.toUpperCase()} @ $${price}.`;
                         sellCallBack(null, msg, bal + price * number);
                     }
-                })
+                });
+                conn.release();
+                if (error) {
+                    sellCallBack(error, null)
+                }
             }
         );
     });
 }
 
-// todo: (frontend): representing database in html table
 // todo: write custom requests for python wrapper

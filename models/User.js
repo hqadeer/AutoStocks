@@ -30,9 +30,6 @@ module.exports.register = function (username, password, regCallback) {
         conn.query(
             'SELECT * FROM users WHERE ID=?', [username],
             function (error, results, fields) {
-                if (error) {
-                    throw err;
-                }
                 if (results.length > 0) {
                     regCallback(null, null);
                 } else {
@@ -56,6 +53,10 @@ module.exports.register = function (username, password, regCallback) {
                         );
                     });
                 }
+                conn.release();
+                if (error) {
+                    throw err;
+                }
             }
         );
     });
@@ -69,6 +70,7 @@ module.exports.findUser = function (username, findCallback) {
         conn.query(
             'SELECT ID, salt, hash FROM users WHERE ID=?', [username],
             function (error, results, fields) {
+                conn.release();
                 if (error) {
                     findCallback(error, null);
                 } else if (results.length === 0) {
