@@ -164,7 +164,8 @@ function buy (id, stock, price, shares, buyCallBack) {
                 if (shares <= 0) {
                     buyCallBack(null, 'Input must be a positive integer!',
                                 balance, true);
-                } else if ((price * shares) > balance) {
+                }
+                if ((price * shares) > balance) {
                     buyCallBack(null, 'Insufficient funds.', balance, true);
                 } else {
                     conn.query(
