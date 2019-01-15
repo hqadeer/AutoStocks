@@ -2,3 +2,5 @@ node_modules/
 package.json
 package-lock.json
 nodemon.json
+algo_connector/dist/
+algo_connector/IEX_wrapper.egg-info/
