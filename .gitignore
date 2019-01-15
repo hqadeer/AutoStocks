@@ -3,4 +3,4 @@ package.json
 package-lock.json
 nodemon.json
 algo_connector/dist/
-algo_connector/IEX_wrapper.egg-info/
+algo_connector/AutoStocks_IEX_wrapper.egg-info/

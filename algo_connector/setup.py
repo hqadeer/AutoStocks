@@ -1,11 +1,8 @@
 import setuptools
 
-with open("../README.md", "r") as fh:
-    long_description = fh.read()
-
 setuptools.setup(
-    name='IEX_wrapper',
-    version='0.11',
+    name='AutoStocks_IEX_wrapper',
+    version='0.10',
     description='Python wrapper for IEX API and AutoStocks web app',
     packages = setuptools.find_packages(),
     author='Hamza Qadeer',
