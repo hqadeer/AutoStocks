@@ -26,12 +26,19 @@ class AutoStocks:
     def _format(lst):
         '''Internal method to take a list of strings and return a
            comma-separated string containing all of them'''
+
+        if isinstance(lst, str):
+            return lst
         query_string = lst[0]
         for string in lst[1:]:
             query_string += (',' + string)
         return query_string
 
     def get_price(self, symbol):
+        '''Returns a stock's latest price using the IEX API.
+           Symbol can either be a one-symbol string or a list of symbols
+        '''
+
         url_base = "https://api.iextrading.com/1.0/stock/"
         if isinstance(symbol, str):
             url = url_base + "{}/quote".format(symbol)
@@ -57,6 +64,15 @@ class AutoStocks:
             return {s: v['quote']['latestPrice'] for s, v in price.items()}
 
     def get_chart(self, symbols, mode='1m', filter=None):
+        '''Returns historical stock data using IEX's API
+
+           symbols -- either a one-symbol string or a list of symbols
+           mode -- options are '5y', '2y', '1y', 'ytd', '6m',
+                   '3m', '1m', '1d', 'dynamic', or a YYYYMMDD string.
+           filter -- either a string or a list of strings. Check IEX API docs
+                     for possible options.
+        '''
+
         url_base = "https://api.iextrading.com/1.0/stock/"
         valid_modes = {'5y', '2y', '1y', 'ytd', '6m', '3m', '1m', '1d',
                        'dynamic'}
@@ -98,7 +114,8 @@ class AutoStocks:
 
     def buy(self, symbol, number):
         '''Buy (number) shares of (symbol). Throws InfoError if transaction
-           fails. Returns new balance otherwise'''
+           fails. Returns new balance otherwise
+        '''
 
         buy_params = {'number': number, 'price': self.get_price(symbol),
                       'symbol': symbol}
@@ -109,6 +126,10 @@ class AutoStocks:
         return buy['balance']
 
     def sell(self, symbol, number):
+        '''Buy (number) shares of (symbol). Throws InfoError if transaction
+           fails. Returns new balance otherwise
+        '''
+
         sell_params = {'number': number, 'price': self.get_price(symbol),
                        'symbol': symbol}
         sell = self.session.post('http://localhost:4800/sell',
@@ -118,6 +139,8 @@ class AutoStocks:
         return sell['balance']
 
     def get_balance(self):
+        '''Return current account balance.'''
+
         try:
             price = self.buy('googl', 5000000)
         except AttributeError as e:
