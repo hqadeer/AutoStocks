@@ -44,10 +44,11 @@ $(function () {
             type: 'POST',
             dataType: 'json',
             success: function (data) {
-                console.log('drawing table');
+                let sum = parseFloat($('#balance').text().substring(1));
                 if (data.length > 0) {
-                    // Formatting
+                    // Formatting and sum computation
                     data.forEach(row => {
+                        sum += row.value
                         row.roi = (100 * ((row.value - row.investment)
                                           / row.investment)).toFixed(2) + '%';
                         row.symbol = row.symbol.toUpperCase();
@@ -83,14 +84,34 @@ $(function () {
                     }
                     table += '</tbody>'+
                              '</table>'+
-                             '</div>'
+                             '</div>';
                     $('#row4').empty();
                     $('#row4').append(table);
                 } else {
                     $('#row4').empty();
                 }
+                let sum_string = '$' + sum.toFixed(2);
+                let roi = 100 * ((sum - 100000) / 100000);
+                let color;
+                if (roi > 0) {
+                    color = 'text-success';
+                    roi = '+' + roi.toFixed(2) + '%';
+                } else {
+                    color = 'text-danger';
+                    roi = roi.toFixed(2) + '%';
+                }
+                let worth = `<p class="text-info pt-2 text-right slightly-larger">`+
+                            `${sum_string}</p>`;
+                let vroi = `<p class="slightly-larger pt-2 text-left ${color}">${roi}</p>`
+                $('#roi').empty();
+                $('#worth').empty()
+                $('#worth').append(worth);
+                $('#roi').append(vroi);
             },
             error: function (req, error) {
+                $('#row4').empty();
+                $('#worth').empty();
+                $('#roi').empty();
                 $('#row4').addClass('text-danger pt-2');
                 $('#row4').append('<p>An error occurred while '+
                                   'loading the table.</p>');
