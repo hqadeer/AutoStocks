@@ -18,16 +18,16 @@ A Node.js web app to manage a virtual stock portfolio and provide API end-points
 
 6) Working frontend; only graphs and insight additions (tbd) remain.
 
+7) Python API wrapper for website and IEX API to trade autonomously.
+
 ### In-Progress:
 
-1) API end-points and Python wrapper to test trading algos.
-
-2) Work on trading algorithms.
+1) Work on trading algorithms.
 
 ### To-do:
 
 1) Testing suite.
 
-2) Graphs and other advanced front-end visuals.
+2) Graphs and other front-end visuals.
 
 3) Security improvements (tbd)
