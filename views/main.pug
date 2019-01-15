@@ -2,7 +2,10 @@ extends ./parent.pug
 
 block content
     h2(class='text-center pt-4 pb-4') Stock Lookup
-    p(class='text-primary at-the-top-right-corner' id='balance') $#{balance}
+    p(class='text-primary at-the-top-right-corner' id='balance') Cash: $#{balance}
+    div(class='at-the-top-left-corner')
+        p(class='text-primary', id='worth')
+        p(id='roi')
     div(class='container-fluid')
         div(class='row justify-content-center', id='row1')
             div(class='col-4-md col-6-sm', id='form1')
@@ -10,19 +13,15 @@ block content
                     div(class='form-group')
                         input(type="text", class="form-control", id="symbol", aria-describedby="symbol", placeholder="Enter stock symbol" required)
                     button(type='submit', class='btn btn-primary') Submit 
-        div(class='row justify-content-center pt-3' id='row2')
+        div(class='row justify-content-center pt-3', id='row2')
+        div(class='row justify-content-center pt-2 text-secondary', id='row2-5')
         div(class='row justify-content-center', id='row3')
             div(class='col-4-md col-6-sm mt-2', id='form2')
         div(class='row justify-content-center', id='row4')
-        div(class='row', id='row5')
-            div(class='col-3')
-            div(class='col-2', id='worth')
-            div(class='col-2')
-            div(class='col-2', id='roi')
-            div(class='col-3')
                 
 
 block scripts 
     script(src='js/stockinfo.js')
+    script(src="https://cdn.plot.ly/plotly-latest.min.js")
     
     

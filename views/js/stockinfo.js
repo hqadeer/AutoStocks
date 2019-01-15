@@ -5,9 +5,6 @@ $(function () {
         symbol = $('#symbol').val();
         let Url = `https://api.iextrading.com/1.0/stock/${symbol}`+
                   `/quote?filter=latestPrice`;
-        $('#price').remove();
-        $('#row2').empty();
-        $('#form2').empty();
         $('#row2').removeClass('text-info');
         $('#row2').removeClass('text-danger');
         $('#row2').addClass('slightly-larger');
@@ -19,7 +16,8 @@ $(function () {
                 price = data.latestPrice;
                 let tag = `<p id='price'>Price: $${price}</p>`;
                 $('#row2').addClass('text-info');
-                $('#row2').append(tag);
+                $('#row2').html(tag);
+                $('#row2-5').html('<p id="graph">Load Graphs</p>');
                 let form = '<form class="form-inline" id="buysell">'+
                            '<div class="form-group">'+
                            '<input type="number" id="shares" class="form-control">'+
@@ -29,12 +27,13 @@ $(function () {
                            '</div>'+
                            '</div>'+
                            '</form>';
-                $('#form2').append(form);
+                $('#form2').html(form);
             },
             error: function (req, error) {
                 let tag = `<p id='price'>Invalid symbol: "${symbol}"</p>`;
                 $('#row2').addClass('text-danger');
-                $('#row2').append(tag);
+                $('#row2').html(tag);
+                $('#row2.5').empty();
             }
         });
     });
@@ -44,7 +43,7 @@ $(function () {
             type: 'POST',
             dataType: 'json',
             success: function (data) {
-                let sum = parseFloat($('#balance').text().substring(1));
+                let sum = parseFloat($('#balance').text().substring(7));
                 if (data.length > 0) {
                     // Formatting and sum computation
                     data.forEach(row => {
@@ -85,12 +84,14 @@ $(function () {
                     table += '</tbody>'+
                              '</table>'+
                              '</div>';
-                    $('#row4').empty();
-                    $('#row4').append(table);
+                    $('#row4').removeClass('text-danger pt-2');
+                    $('#row4').html(table);
                 } else {
                     $('#row4').empty();
+                    flag = true;
                 }
-                let sum_string = '$' + sum.toFixed(2);
+                console.log(sum)
+                let worth = '$' + sum.toFixed(2);
                 let roi = 100 * ((sum - 100000) / 100000);
                 let color;
                 if (roi > 0) {
@@ -100,28 +101,22 @@ $(function () {
                     color = 'text-danger';
                     roi = roi.toFixed(2) + '%';
                 }
-                let worth = `<p class="text-info pt-2 text-right slightly-larger">`+
-                            `${sum_string}</p>`;
-                let vroi = `<p class="slightly-larger pt-2 text-left ${color}">${roi}</p>`
-                $('#roi').empty();
-                $('#worth').empty()
-                $('#worth').append(worth);
-                $('#roi').append(vroi);
+                $('#roi').removeClass('text-success');
+                $('#roi').removeClass('text-danger');
+                $('#roi').addClass(color);
+                $('#worth').text('Worth: ' + worth);
+                $('#roi').text('ROI: ' + roi);
             },
             error: function (req, error) {
-                $('#row4').empty();
-                $('#worth').empty();
-                $('#roi').empty();
                 $('#row4').addClass('text-danger pt-2');
-                $('#row4').append('<p>An error occurred while '+
-                                  'loading the table.</p>');
+                $('#row4').html('<p>An error occurred while '+
+                                'loading the table.</p>');
             }
         });
     }
     function buysell (event, type) {
         event.preventDefault();
         let number = $('#shares').val();
-        $('#row2').empty();
         $('#row2').removeClass('text-info');
         $('#row2').removeClass('text-danger');
         $('#row2').removeClass('slightly-larger');
@@ -137,18 +132,25 @@ $(function () {
                 } else {
                     $('#row2').addClass('text-info');
                 }
-                $('#row2').append(data.message);
+                $('#row2').html(data.message);
                 $('#balance').text('$'+data.balance.toFixed(2));
                 console.log('here');
-                setTimeout(drawTable, 500);
+                setTimeout(timeTable, 500);
             },
             error: function (req, error) {
                 $('#row2').addClass('text-danger');
-                $('#row2').append('An error occurred.');
+                $('#row2').html('An error occurred.');
             }
         });
     }
-    drawTable();
+    let flag = false;
+    function timeTable() {
+        drawTable()
+        if (!flag) {
+            setTimeout(timeTable, 10000);
+        }
+    }
+    timeTable();
     $(document).on('click', '#buy', evt => buysell(evt, "buy"));
     $(document).on('click', '#sell', evt => buysell(evt, "sell"));
 });
