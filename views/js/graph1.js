@@ -1,13 +1,16 @@
 $(function () {
     $.ajax({
-        url: `https://api.iextrading.com/1.0/stock/${globals.symbol}/chart/5y`+
-             '?filter=date,close',
+        url: `https://api.iextrading.com/1.0/stock/${globals.symbol}/chart/1d`+
+             '?filter=date,marketAverage,minute',
         type: 'GET',
         datatype: 'json',
         success: function (a) {
             let symbol = globals.symbol;
             let x = [], y = [];
-            let data = a.map(row => {x.push(row.date); y.push(row.close);});
+            let data = a.map(row => {
+                x.push(row.minute);
+                y.push(row.marketAverage);
+            });
             let chart_data = [{
                 type: 'scatter',
                 mode: 'lines',
@@ -16,43 +19,25 @@ $(function () {
                 y: y
             }];
             let layout = {
-                title: `${symbol.toUpperCase()} Price: History`,
+                title: `${symbol.toUpperCase()} Price: Past Day`,
                 xaxis: {
                     autorange: true,
                     rangeselector: { buttons: [
                         {
                             count: 1,
-                            label: '1m',
-                            step: 'month',
-                            stepmode: 'backward'
-                        },
-                        {
-                            count: 3,
-                            label: '3m',
-                            step: 'month',
+                            label: '1hr',
+                            step: 'hour',
                             stepmode: 'backward'
                         },
                         {
                             count: 6,
-                            label: '6m',
-                            step: 'month',
+                            label: '6hr',
+                            step: 'hour',
                             stepmode: 'backward'
                         },
-                        {
-                            count: 1,
-                            label: '1y',
-                            step: 'year',
-                            stepmode: 'backward'
-                        },
-                        {
-                            count: 2,
-                            label: '2y',
-                            step: 'year',
-                            stepmode: 'backward'
-                        },
-                        { step: 'all' },
+                        { step: 'all' }
                     ]},
-                    type: 'date'
+                    type: 'time'
                 },
                 yaxis: {
                     autorange: true,
