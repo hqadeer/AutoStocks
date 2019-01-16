@@ -8,7 +8,8 @@ $(function () {
             let symbol = globals.symbol;
             let x = [], y = [];
             let data = a.map(row => {
-                x.push(row.minute);
+                x.push(row.date.substring(0, 4) + '-' + row.date.substring(4, 6)
+                       + '-' + row.date.substring(6, 8) + ' ' + row.minute);
                 y.push(row.marketAverage);
             });
             let chart_data = [{
@@ -37,7 +38,7 @@ $(function () {
                         },
                         { step: 'all' }
                     ]},
-                    type: 'time'
+                    type: 'date'
                 },
                 yaxis: {
                     autorange: true,

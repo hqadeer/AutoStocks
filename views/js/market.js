@@ -169,8 +169,8 @@ $(function () {
             $('#graph2').attr('hidden', false);
             $('#graph1').html('<script src="js/graph1.js"></script>');
             $('#graph2').html('<script src="js/graph2.js"></script>');
-            $('#graph1').slideDown('fast');
-            $('#graph2').slideDown('fast');
+            $('#graph1').slideDown('slow');
+            $('#graph2').slideDown('slow');
         } else {
             $('#graph').text('Load Graphs');
             $('#graph1').attr('hidden', true);
