@@ -1,8 +1,11 @@
+let globals = {}
+
 $(function () {
     let price, symbol;
     $('#symbol-form').submit(function (evt) {
         evt.preventDefault();
-        symbol = $('#symbol').val();
+        globals.symbol = $('#symbol').val();
+        symbol = globals.symbol;
         let Url = `https://api.iextrading.com/1.0/stock/${symbol}`+
                   `/quote?filter=latestPrice`;
         $('#row2').removeClass('text-info');
@@ -17,7 +20,7 @@ $(function () {
                 let tag = `<p id='price'>Price: $${price}</p>`;
                 $('#row2').addClass('text-info');
                 $('#row2').html(tag);
-                $('#row2-5').html('<p id="graph">Load Graphs</p>');
+                $('#row2-5').html('<a id="graph" href="#">Load Graphs</a>');
                 let form = '<form class="form-inline" id="buysell">'+
                            '<div class="form-group">'+
                            '<input type="number" id="shares" class="form-control">'+
@@ -121,6 +124,9 @@ $(function () {
         $('#row2').removeClass('text-danger');
         $('#row2').removeClass('slightly-larger');
         $('#form2').empty();
+        $('#row2-5').empty()
+        $('#graph1').empty();
+        $('#graph2').empty();
         $.ajax({
             url: `http://localhost:4800/${type}`,
             type: 'POST',
@@ -133,7 +139,7 @@ $(function () {
                     $('#row2').addClass('text-info');
                 }
                 $('#row2').html(data.message);
-                $('#balance').text('$'+data.balance.toFixed(2));
+                $('#balance').text('Cash: $'+data.balance.toFixed(2));
                 console.log('here');
                 setTimeout(timeTable, 500);
             },
@@ -153,4 +159,17 @@ $(function () {
     timeTable();
     $(document).on('click', '#buy', evt => buysell(evt, "buy"));
     $(document).on('click', '#sell', evt => buysell(evt, "sell"));
+    $(document).on('click', '#graph', () => {
+        if ($('#graph').text() === 'Load Graphs') {
+            $('#graph').text('Hide Graphs');
+            $('#graph1').append('<script src="js/graph1.js"></script>');
+            $('#graph2').append('<script src="js/graph2.js"></script>');
+            $('#graph1').slideDown('fast');
+            $('#graph2').slideDown('fast');
+        } else {
+            $('#graph').text('Load Graphs');
+            $('#graph1').slideUp('fast');
+            $('#graph2').slideUp('fast');
+        }
+    });
 });
