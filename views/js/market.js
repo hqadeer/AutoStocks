@@ -2,6 +2,7 @@ let globals = {}
 
 $(function () {
     let price, symbol;
+    let flag = false;
     $('#symbol-form').submit(function (evt) {
         evt.preventDefault();
         globals.symbol = $('#symbol').val();
@@ -18,6 +19,8 @@ $(function () {
             success: function (data) {
                 price = data.latestPrice;
                 let tag = `<p id='price'>Price: $${price}</p>`;
+                $('#graph1').empty();
+                $('#graph2').empty();
                 $('#row2').addClass('text-info');
                 $('#row2').html(tag);
                 $('#row2-5').html('<a id="graph" href="#">Load Graphs</a>');
@@ -48,6 +51,7 @@ $(function () {
             success: function (data) {
                 let sum = parseFloat($('#balance').text().substring(7));
                 if (data.length > 0) {
+                    flag = false;
                     // Formatting and sum computation
                     data.forEach(row => {
                         sum += row.value
@@ -149,7 +153,6 @@ $(function () {
             }
         });
     }
-    let flag = false;
     function timeTable() {
         drawTable()
         if (!flag) {
@@ -162,12 +165,16 @@ $(function () {
     $(document).on('click', '#graph', () => {
         if ($('#graph').text() === 'Load Graphs') {
             $('#graph').text('Hide Graphs');
-            $('#graph1').append('<script src="js/graph1.js"></script>');
-            $('#graph2').append('<script src="js/graph2.js"></script>');
+            $('#graph1').attr('hidden', false);
+            $('#graph2').attr('hidden', false);
+            $('#graph1').html('<script src="js/graph1.js"></script>');
+            $('#graph2').html('<script src="js/graph2.js"></script>');
             $('#graph1').slideDown('fast');
             $('#graph2').slideDown('fast');
         } else {
             $('#graph').text('Load Graphs');
+            $('#graph1').attr('hidden', true);
+            $('#graph2').attr('hidden', true);
             $('#graph1').slideUp('fast');
             $('#graph2').slideUp('fast');
         }
