@@ -108,7 +108,7 @@ $(function () {
                 let worth = format(sum, '$');
                 let roi = format(100 * ((sum - 100000) / 100000), '%');
                 let color;
-                if (roi > 0) {
+                if (sum > 100000) {
                     color = 'text-success';
                 } else {
                     color = 'text-danger';
