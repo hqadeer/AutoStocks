@@ -26,7 +26,8 @@ module.exports.init = function initDatabase () {
             ID varchar(255), \
             symbol varchar(255), \
             number int, \
-            price numeric(16, 2) UNSIGNED \
+            price numeric(16, 2) UNSIGNED, \
+            percent double DEFAULT 0.00\
         );',
         errorHandle
     );

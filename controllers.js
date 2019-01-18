@@ -72,7 +72,7 @@ function currentPrice(symbols, priceCallBack) {
         symbolUrl += `,${symbol}`
     }
     let Url = `https://api.iextrading.com/1.0/stock/market/batch?symbols`+
-              `=${symbolUrl}&types=quote&filter=latestPrice`
+              `=${symbolUrl}&types=quote&filter=latestPrice,changePercent`
     request(Url, function(err, response, body) {
         errorHandle(err);
         let info = JSON.parse(body);
@@ -87,7 +87,8 @@ function currentPrice(symbols, priceCallBack) {
             priceCallBack(new Error('Invalid symbol(s): ' + wrongSymbols),
                           null);
         } else {
-            let vals = acceptedSymbols.map(key => info[key].quote.latestPrice);
+            let vals = acceptedSymbols.map(key => [info[key].quote.latestPrice,
+                                           info[key].quote.changePercent]);
             priceCallBack(null, vals);
         }
     });
@@ -109,8 +110,9 @@ module.exports.updatePrices = function () {
                         for (var i in symbols) {
                             // i is the index
                             conn.query(
-                                'UPDATE stocks SET price=? WHERE symbol=?',
-                                [prices[i], symbols[i]],
+                                'UPDATE stocks SET price=?, percent=?'+
+                                'WHERE symbol=?',
+                                [prices[i][0], prices[i][1], symbols[i]],
                                 errorHandle
                             );
                         }
@@ -128,28 +130,32 @@ module.exports.genTable = function(id, callback) {
     db.getConn(function (err, conn) {
         if (err) {
             callback(err, null);
-        }
-        conn.query(
-            'SELECT s.symbol, s.number, s.price, s.number * s.price as value, '+
-                'SUM(CASE WHEN h.action = "buy" THEN h.number * h.price '+
-                          'WHEN h.action = "sell" THEN -h.number * h.price '+
-                          'ELSE 0 '+
-                    'END) as investment '+
-            'FROM stocks AS s INNER JOIN history AS h '+
-            'ON s.symbol = h.symbol AND s.ID = h.ID '+
-            'WHERE s.ID=? '+
-            'GROUP BY s.symbol, s.number, s.price '+
-            'ORDER BY value DESC;',
-            [id],
-            function (err, results, fields) {
-                conn.release();
-                if (err) {
-                    callback(err, null);
-                } else {
-                    callback(null, results);
+        } else {
+            conn.query(
+                'SELECT s.symbol, s.number, s.price, s.price * s.number as ' +
+                    'value, s.percent, '+
+                    'SUM(CASE WHEN h.action = "buy" THEN h.number * h.price '+
+                             'ELSE 0 '+
+                        'END) as investment, '+
+                    'SUM(CASE WHEN h.action = "sell" THEN h.number * h.price '+
+                             'ElSE 0 '+
+                        'END) + s.number * s.price as gains '+
+                'FROM stocks AS s INNER JOIN history AS h '+
+                'ON s.symbol = h.symbol AND s.ID = h.ID '+
+                'WHERE s.ID=? '+
+                'GROUP BY s.symbol, s.number, s.price, s.percent '+
+                'ORDER BY value DESC;',
+                [id],
+                function (err, results, fields) {
+                    conn.release();
+                    if (err) {
+                        callback(err, null);
+                    } else {
+                        callback(null, results);
+                    }
                 }
-            }
-        );
+            );
+        }
     });
 }
 
@@ -200,7 +206,7 @@ function buy (id, stock, price, shares, buyCallBack) {
                             } else {
                                 conn.query(
                                     'INSERT INTO stocks VALUES( \
-                                        ?, ?, ?, ? \
+                                        ?, ?, ?, ?, 0 \
                                     );',
                                     [id, stock, shares, price],
                                     errorHandle

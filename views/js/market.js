@@ -55,7 +55,7 @@ $(function () {
                     // Formatting and sum computation
                     data.forEach(row => {
                         sum += row.value
-                        row.roi = (100 * ((row.value - row.investment)
+                        row.roi = (100 * ((row.gains - row.investment)
                                           / row.investment)).toFixed(2) + '%';
                         row.symbol = row.symbol.toUpperCase();
                         for (e of ['price', 'value', 'investment']) {
@@ -83,7 +83,9 @@ $(function () {
                     for (let row of data) {
                         let tRow = '<tr>';
                         for (let key of Object.keys(row)) {
-                            tRow += `<td>${row[key]}</td>`;
+                            if (key != 'gains') {
+                                tRow += `<td>${row[key]}</td>`;
+                            }
                         }
                         tRow += '</tr>';
                         table += tRow;
