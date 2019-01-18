@@ -21,13 +21,13 @@ This is an on-going project. My long-term goal is to use this to validate strate
 
 7) Python API wrapper for website and IEX API to trade autonomously.
 
+8) Improved ROI and investment indicators.
+
 ### In-Progress:
 
 1) Backtesting strategies
 
 2) Improvements to make app more realistic; queue purchases made outside market hours, latency, etc.
-
-3) Improvements to financial indicators shown in table.
 
 ### To-do:
 
