@@ -43,6 +43,14 @@ $(function () {
             }
         });
     });
+    format = (number, mode) => {
+        let base = number.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        if (mode === '$') {
+            return mode + base;
+        } else if (mode === '%') {
+            return base + mode;
+        }
+    }
     function drawTable () {
         $.ajax({
             url: 'http://localhost:4800/table',
@@ -55,17 +63,13 @@ $(function () {
                     // Formatting and sum computation
                     data.forEach(row => {
                         sum += row.value
-                        row.roi = (100 * ((row.gains - row.investment)
-                                          / row.investment)).toFixed(2) + '%';
+                        row.roi = format((100 * ((row.gains - row.investment)
+                                          / row.investment)), '%')
                         row.symbol = row.symbol.toUpperCase();
                         for (e of ['price', 'value', 'investment']) {
-                            row[e] = '$' + row[e].toString();
-                            if (!row[e].includes('.')) {
-                                row[e] = row[e] + '.00';
-                            } else if (row[e].split('.')[1].length < 2) {
-                                row[e] = row[e] + '0';
-                            }
+                            row[e] = format(row[e], '$');
                         }
+                        row.percent = format(100 * row.percent, '%');
                     });
                     let table = '<div class="container mt-3 table-responsive-sm scrollable-div" id="table-container">'+
                                 '<table class="table table-striped">'+
@@ -74,6 +78,7 @@ $(function () {
                                       '<th scope="col">Stock</th>'+
                                       '<th scope="col"># of Shares</th>'+
                                       '<th scope="col">Current Price</th>'+
+                                      '<th scope="col">Price Today</th>'+
                                       '<th scope="col">Value</th>'+
                                       '<th scope="col">Investment</th>'+
                                       '<th scope="col">ROI</th>'+
@@ -100,15 +105,13 @@ $(function () {
                     flag = true;
                 }
                 console.log(sum)
-                let worth = '$' + sum.toFixed(2);
-                let roi = 100 * ((sum - 100000) / 100000);
+                let worth = format(sum, '$');
+                let roi = format(100 * ((sum - 100000) / 100000), '%');
                 let color;
                 if (roi > 0) {
                     color = 'text-success';
-                    roi = '+' + roi.toFixed(2) + '%';
                 } else {
                     color = 'text-danger';
-                    roi = roi.toFixed(2) + '%';
                 }
                 $('#roi').removeClass('text-success');
                 $('#roi').removeClass('text-danger');

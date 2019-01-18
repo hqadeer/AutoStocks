@@ -132,8 +132,8 @@ module.exports.genTable = function(id, callback) {
             callback(err, null);
         } else {
             conn.query(
-                'SELECT s.symbol, s.number, s.price, s.price * s.number as ' +
-                    'value, s.percent, '+
+                'SELECT s.symbol, s.number, s.price, s.percent, s.price * ' +
+                    's.number as value, '+
                     'SUM(CASE WHEN h.action = "buy" THEN h.number * h.price '+
                              'ELSE 0 '+
                         'END) as investment, '+
