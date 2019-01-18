@@ -1,3 +1,5 @@
+/* Note: names deliberately weird to avoid conflicts with Bootstrap class names */
+
 .at-the-bottom {
   margin-top: 5%;
   text-align: center;
@@ -24,6 +26,11 @@
 .scrollable-div {
     overflow-y: auto;
     display: inline-block;
+}
+
+.dopad {
+    padding-left: 0.5%;
+    padding-right: 0.5%;
 }
 
 html {

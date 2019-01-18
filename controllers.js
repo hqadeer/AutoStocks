@@ -123,7 +123,7 @@ module.exports.updatePrices = function () {
             );
         });
     }
-    setInterval(update, 10000)
+    setInterval(update, 5000)
 }
 
 module.exports.genTable = function(id, callback) {

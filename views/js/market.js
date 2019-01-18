@@ -7,8 +7,8 @@ $(function () {
         evt.preventDefault();
         globals.symbol = $('#symbol').val();
         symbol = globals.symbol;
-        let Url = `https://api.iextrading.com/1.0/stock/${symbol}`+
-                  `/quote?filter=latestPrice`;
+        let Url = `https://api.iextrading.com/1.0/stock/market/batch/?symbols=`+
+                  `${symbol}&types=quote&filter=latestPrice,changePercent`;
         $('#row2').removeClass('text-info');
         $('#row2').removeClass('text-danger');
         $('#row2').addClass('slightly-larger');
@@ -17,11 +17,22 @@ $(function () {
             type: 'GET',
             dataType: 'json',
             success: function (data) {
-                price = data.latestPrice;
-                let tag = `<p id='price'>Price: $${price}</p>`;
+                let info = data[symbol.toUpperCase()].quote;
+                price = info.latestPrice;
+                fPrice = format(info.latestPrice, '$');
+                let perc = format(info.changePercent, '%');
+                let color;
+                if (perc[0] === '+') {
+                    color = 'text-success';
+                } else if (perc[0] === '-') {
+                    color = 'text-danger';
+                } else {
+                    color = 'text-primary';
+                }
+                let tag = `<p id="price" class="text-info dopad">${fPrice}</p>`+
+                          `<p class="${color} dopad">${perc}</p>`;
                 $('#graph1').empty();
                 $('#graph2').empty();
-                $('#row2').addClass('text-info');
                 $('#row2').html(tag);
                 $('#row2-5').html('<a id="graph" href="#">Load Graphs</a>');
                 let form = '<form class="form-inline" id="buysell">'+
@@ -48,7 +59,13 @@ $(function () {
         if (mode === '$') {
             return mode + base;
         } else if (mode === '%') {
-            return base + mode;
+            if (number === 0) {
+                return base + mode;
+            } else if (number > 0) {
+                return '+' + base + mode;
+            } else {
+                return '-' + base + mode;
+            }
         }
     }
     function drawTable () {
