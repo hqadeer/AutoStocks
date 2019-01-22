@@ -25,8 +25,7 @@ app.use(passport.session());
 app.set('view engine', 'pug')
 app.set("views", path.join(__dirname, "views"))
 
-// Passport configuration
-
+// Passport configuration for logins and signups
 passport.use('local-login', new LocalStrategy(
     { passReqToCallback: true },
     function (req, username, password, passBack) {
@@ -65,7 +64,7 @@ passport.use('local-signup', new LocalStrategy(
     }
 ));
 
-
+// Passport serialization and deserialization
 passport.serializeUser(function(user, done) {
     done(null, { id: user.id });
 });
@@ -75,10 +74,7 @@ passport.deserializeUser(function(user, done) {
 });
 
 
-// Miscellaneous variables
-var thePrice;
-var theSymbol;
-
+// Check if user is logged in
 function isAuth (req, res, call) {
     if (req.isAuthenticated()) {
         return call();
@@ -172,6 +168,7 @@ app.get('/', isAuth, function (req, res, next) {
     });
 });
 
+// Initialize app
 app.listen(4800, function () {
     db.init();
     backend.updatePrices();
