@@ -3,7 +3,7 @@ const db = require('./config/db');
 const helpers = require('./config/helpers');
 const isEmpty = helpers.isEmpty;
 const errorHandle = helpers.errorHandle;
-const TRANSACTION_FEE = 4.95;
+const TRANSACTION_FEE = 4.95; // Transaction fee for all buys and sells.
 
 module.exports = {
     getCurrentPrice: currentPrice,
@@ -17,7 +17,11 @@ let apiKey = 'F24C5SOKOYQUBV6K';
 function getData(symbol, options, callback) {
     /* Obtains the past two hours of prices for the
        stock specified by symbol and calls callback function
-       on it
+       on it.
+
+       Note: This uses AlphaVantage API instead of IEX. AlphaVantage has
+       currently been deprecated because of its rate limitations, but
+       it might be used later for less frequent queries.
     */
 
     // Defaults
@@ -350,5 +354,3 @@ function sell (id, symbol, price, number, sellCallBack) {
         );
     });
 }
-
-// todo: write custom requests for python wrapper
