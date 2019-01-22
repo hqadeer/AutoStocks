@@ -11,7 +11,7 @@ module.exports = {
     sell: sell
 }
 
-let apiKey = 'F24C5SOKOYQUBV6K';
+let apiKey = 'F24C5SOKOYQUBV6K'; // Key for AlphaVantage
 
 
 function getData(symbol, options, callback) {
