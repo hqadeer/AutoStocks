@@ -1,6 +1,9 @@
+// Module handles MySQL database connections
+
 const mysql = require('mysql');
 const errorHandle = require('./helpers').errorHandle;
 
+// Create MySQL pool to dynamically allocate database connections
 var pool = mysql.createPool({
     connectionLimit: 10,
     host : 'localhost',
@@ -11,6 +14,16 @@ var pool = mysql.createPool({
 });
 
 module.exports.init = function initDatabase () {
+    /* Initialize database with three tables: users, stocks, and histories.
+
+       users ---- info on all usernames; stores user salt, hash, and balance as
+                  well
+       stocks --- data for current holdings of each user; check code for table
+                  schema
+       history -- history of all transactions made by all users; check code for
+                  table schema
+    */
+
     pool.query(
         'CREATE TABLE IF NOT EXISTS users ( \
             ID varchar(255) UNIQUE NOT NULL, \
@@ -45,6 +58,12 @@ module.exports.init = function initDatabase () {
 }
 
 module.exports.getConn = function(callback) {
+    /* Obtain database connection; run query within callback function
+
+       Callback takes error and connection object as input; either can be null
+       if applicable.
+    */
+
     pool.getConnection(function (err, conn) {
         if (err) {
             callback(err, null);
