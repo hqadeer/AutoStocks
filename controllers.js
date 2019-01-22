@@ -3,6 +3,7 @@ const db = require('./config/db');
 const helpers = require('./config/helpers');
 const isEmpty = helpers.isEmpty;
 const errorHandle = helpers.errorHandle;
+const TRANSACTION_FEE = 4.95;
 
 module.exports = {
     getCurrentPrice: currentPrice,
@@ -11,6 +12,7 @@ module.exports = {
 }
 
 let apiKey = 'F24C5SOKOYQUBV6K';
+
 
 function getData(symbol, options, callback) {
     /* Obtains the past two hours of prices for the
@@ -65,7 +67,12 @@ function getData(symbol, options, callback) {
 }
 
 function currentPrice(symbols, priceCallBack) {
-    // Takes a list of stock symbols and results a list of their latest prices.
+    /* Obtain the current price and daily price change of one or more stocks.
+       Returns an object with the symbols as keys and a two-item array of
+       current price and price change as values
+
+       symbols -- list of one or more stock symbols
+    */
 
     symbolUrl = symbols[0]
     for (var symbol of symbols.slice(1)) {
@@ -95,6 +102,10 @@ function currentPrice(symbols, priceCallBack) {
 }
 
 module.exports.updatePrices = function () {
+    /* Update database stock prices and percent changes in the background
+       every five seconds
+    */
+
     function update () {
         console.log('updating')
         db.getConn(function (err, conn) {
@@ -127,6 +138,19 @@ module.exports.updatePrices = function () {
 }
 
 module.exports.genTable = function(id, callback) {
+    /* Queries history and stock tables of database to return data for display
+       table on website.
+
+       Columns:
+       symbol -- stock symbol
+       number -- number of shares currently owned
+       percent -- latest daily change in stock price, in percentage
+       value -- product of stock's current price and number of shares owned
+       investment -- sum of all money ever spent buying a stock
+       gains -- sum current value of stock owned, as well as all money ever made
+                by selling a stock
+    */
+
     db.getConn(function (err, conn) {
         if (err) {
             callback(err, null);
@@ -160,6 +184,24 @@ module.exports.genTable = function(id, callback) {
 }
 
 function buy (id, stock, price, shares, buyCallBack) {
+    /* Buy a stock for a particular user
+
+       id -- username of purchaser
+       stock -- symbol being purchased
+       price -- current price of share (will be deprecated for realistic delay)
+       shares -- number of shares being purchased
+       buyCallback -- callback function
+
+       returns:
+       error -- error raised during execution; if no error was raised, this is
+                null
+       message (string) -- message; invalid purchases (i.e. negative inputs, or
+                  insufficient funds) are returned as messages, not errors.
+       balance (float) -- new account balance after transaction
+       failed (boolean) -- true if transaction did not complete (i.e., because
+                           of insufficient funds)
+    */
+
     db.getConn(function (err, conn) {
         errorHandle(err);
         conn.query(
@@ -228,6 +270,24 @@ function buy (id, stock, price, shares, buyCallBack) {
 }
 
 function sell (id, symbol, price, number, sellCallBack) {
+    /* Sell a stock for a particular user
+
+       id -- username of seller
+       symbol -- symbol being sold
+       price -- current price of share (will be deprecated for realistic delay)
+       number -- number of shares being sold
+       sellCallBack -- callback function
+
+       returns:
+       error -- error raised during execution; if no error was raised, this is
+                null
+       message (string) -- message; invalid purchases (i.e. negative inputs, or
+                  insufficient funds) are returned as messages, not errors.
+       balance (float) -- new account balance after transaction
+       failed (boolean) -- true if transaction did not complete (i.e., because
+                           of insufficient funds)
+    */
+
     console.log('selling');
     db.getConn(function (err, conn) {
         errorHandle(err)
