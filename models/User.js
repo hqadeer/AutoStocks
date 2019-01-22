@@ -1,8 +1,13 @@
+// Class and utility functions for Users
+
+// Dependencies
 const crypto = require('crypto');
 const db = require('../config/db');
 const conn = require('../controllers');
 
 class User {
+    // User class; takes id, salt, and hash as input. Used for password-checking.
+
     constructor (attr) {
         this.id = attr.ID;
         this.salt = attr.salt;
@@ -17,12 +22,22 @@ class User {
 }
 
 module.exports.register = function (username, password, regCallback) {
+    /* Takes username and password (and callback function) as input; registers
+       user.
+
+       Callback function takes two inputs: error and user. Values can be null if
+       not applicable.
+    */
+
     function hash (password, hashCallback) {
+        // Helper function to generate a salt and hash a password
+
         let salt = crypto.randomBytes(16).toString('hex');
         let hash =
         crypto.pbkdf2Sync(password, salt, 10000, 512, 'sha512').toString('hex');
         hashCallback(username, salt, hash)
     }
+
     db.getConn(function (err, conn) {
         if (err) {
             throw err;
@@ -63,6 +78,13 @@ module.exports.register = function (username, password, regCallback) {
 }
 
 module.exports.findUser = function (username, findCallback) {
+    /* Find user with given username and call callback function on corresponding
+       user object.
+
+       findCallback takes error and User object as input. Either could be null
+       if applicable.
+    */
+    
     db.getConn(function (err, conn) {
         if (err) {
             throw err;
