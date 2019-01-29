@@ -187,8 +187,54 @@ module.exports.genTable = function(id, callback) {
     });
 }
 
-function buy (id, stock, price, shares, buyCallBack) {
-    /* Buy a stock for a particular user
+function buy (id, symbol, price, number, done) {
+    /* Purchase stocks right now if market is open; otherwise, queue purchase
+       for later.
+
+       done takes 4 parameters:
+       error -- error raised during execution; if no error was raised, this is
+                null
+       message (string) -- message; invalid purchases (i.e. negative inputs, or
+                  insufficient funds) are returned as messages, not errors.
+       balance (float) -- will be null for queued purchases
+       failed (boolean) -- true if transaction did not complete (i.e., because
+                           of insufficient funds)
+    */
+
+    if (isMarketOpen()) {
+        buyNow(id, symbol, price, number, done);
+    } else {
+        queue({ id: id, symbol: symbol, number: number, type: "buy" });
+    }
+}
+
+function sell (id, symbol, price, number, done) {
+    /* Sell stocks right now if market is open; otherwise, queue sale
+       for later.
+
+       done takes 4 parameters:
+       error -- error raised during execution; if no error was raised, this is
+                null
+       message (string) -- message; invalid purchases (i.e. negative inputs, or
+                  insufficient funds) are returned as messages, not errors.
+       balance (float) -- will be null for queued purchases
+       failed (boolean) -- true if transaction did not complete (i.e., because
+                           of insufficient funds)
+    */
+
+    if (isMarketOpen()) {
+        sellNow(id, symbol, price, number, done);
+    } else {
+        queue({ id: id, symbol: symbol, number: number, type: "sell" }, done);
+    }
+}
+
+function queue (purchase, done) {
+
+}
+
+function buyNow (id, stock, price, shares, buyCallBack) {
+    /* Buy a stock for a particular user now
 
        id -- username of purchaser
        stock -- symbol being purchased
@@ -196,12 +242,12 @@ function buy (id, stock, price, shares, buyCallBack) {
        shares -- number of shares being purchased
        buyCallback -- callback function
 
-       returns:
+       callback takes 4 parameters:
        error -- error raised during execution; if no error was raised, this is
                 null
        message (string) -- message; invalid purchases (i.e. negative inputs, or
                   insufficient funds) are returned as messages, not errors.
-       balance (float) -- new account balance after transaction
+       balance (float) -- new account balance after transaction; null if same
        failed (boolean) -- true if transaction did not complete (i.e., because
                            of insufficient funds)
     */
@@ -215,10 +261,10 @@ function buy (id, stock, price, shares, buyCallBack) {
                 let balance = results[0].balance;
                 if (shares <= 0) {
                     buyCallBack(null, 'Input must be a positive integer!',
-                                balance, true);
+                                null, true);
                 }
                 if ((price * shares) > balance) {
-                    buyCallBack(null, 'Insufficient funds.', balance, true);
+                    buyCallBack(null, 'Insufficient funds.', null, true);
                 } else {
                     conn.query(
                         'UPDATE users \
@@ -273,8 +319,8 @@ function buy (id, stock, price, shares, buyCallBack) {
     });
 }
 
-function sell (id, symbol, price, number, sellCallBack) {
-    /* Sell a stock for a particular user
+function sellNow (id, symbol, price, number, sellCallBack) {
+    /* Sell a stock for a particular user now
 
        id -- username of seller
        symbol -- symbol being sold
@@ -282,12 +328,12 @@ function sell (id, symbol, price, number, sellCallBack) {
        number -- number of shares being sold
        sellCallBack -- callback function
 
-       returns:
+       callback takes 4 parameters:
        error -- error raised during execution; if no error was raised, this is
                 null
        message (string) -- message; invalid purchases (i.e. negative inputs, or
                   insufficient funds) are returned as messages, not errors.
-       balance (float) -- new account balance after transaction
+       balance (float) -- new account balance after transaction; null if same
        failed (boolean) -- true if transaction did not complete (i.e., because
                            of insufficient funds)
     */
@@ -305,13 +351,13 @@ function sell (id, symbol, price, number, sellCallBack) {
                     let bal = r[0].balance;
                     if (number <= 0) {
                         sellCallBack(null, 'Input must be a positive integer!',
-                                     bal, true);
+                                     null, true);
                     } else if (results.length === 0) {
                         sellCallBack(null, 'You do not own any shares of '+
                                            symbol.toUpperCase() +'!',
-                                     bal, true);
+                                     null, true);
                     } else if (results[0].number < number) {
-                        sellCallBack(null, 'Insufficient shares.', bal, true);
+                        sellCallBack(null, 'Insufficient shares.', null, true);
                     } else {
                         conn.query(
                             'UPDATE users \
@@ -357,7 +403,7 @@ function sell (id, symbol, price, number, sellCallBack) {
 
 function isMarketOpen () {
     /* Checks whether US stock market is currently open. Checks against
-       federal holidays as well.
+       federal holidays as well. This was annoying to code.
     */
 
     let d = new Date();
