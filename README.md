@@ -7,7 +7,7 @@ This is an on-going project. My long-term goal is to use this to validate strate
 
 ### Snapshot
 
-![Snapshot](https://imgur.com/hXVUBP4.jpg)
+![Snapshot](https://imgur.com/koNNQLs.jpg)
 
 ### Current features:
 
