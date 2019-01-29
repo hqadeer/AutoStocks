@@ -165,8 +165,9 @@ $(function () {
                     $('#row2').addClass('text-info');
                 }
                 $('#row2').html(data.message);
-                $('#balance').text('Cash: $'+data.balance.toFixed(2));
-                console.log('here');
+                if (data.balance != null) {
+                    $('#balance').text('Cash: ' + format(data.balance, '$'));
+                }
                 setTimeout(timeTable, 500);
             },
             error: function (req, error) {
