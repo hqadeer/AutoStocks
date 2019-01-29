@@ -54,6 +54,16 @@ module.exports.init = function initDatabase () {
         );',
         errorHandle
     );
+    pool.query(
+        'CREATE TABLE IF NOT EXISTS queue ( '+
+            'ID varchar(255), '+
+            'symbol varchar(255), '+
+            'number int, '+
+            'price numeric(16, 2) UNSIGNED, '+
+            'action varchar(255)'+
+        ');',
+        errorHandle
+    )
     console.log('Database connection and initialization successful.');
 }
 
