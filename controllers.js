@@ -354,3 +354,45 @@ function sell (id, symbol, price, number, sellCallBack) {
         );
     });
 }
+
+function isMarketOpen () {
+    /* Checks whether US stock market is currently open. Checks against
+       federal holidays as well.
+    */
+
+    let d = new Date();
+    let date = d.getDate();
+    let day = d.getDay();
+    let month = d.getMonth();
+    let hour = d.getHour();
+    let min = d.getMinute();
+    if (hour + (min / 60) < 6.5 || hour + (min / 60) > 13) { // Market hours
+        return false;
+    } else if (day == 0 || day == 6) { // Weekend
+        return false;
+    } else if (month == 0 && date == 1) { // New Year's
+        return false;
+    } else if (month == 0 && day == 1 && date <= 21 && date > 14) { // MLK day
+        return false;
+    } else if (month == 1 && day == 1 && date <= 21 && date > 14) { // President's day
+        return false;
+    } else if (month == 4 && day == 1 && date > 24) { // Memorial day
+        return false;
+    } else if (month == 6 && date == 3 && hour > 10) { // Early close on 7/3
+        return false;
+    } else if (month == 6 && date == 4) { // 4th of July
+        return false;
+    } else if (month == 8 && day == 1 && date < 8) { // Labor day
+        return false;
+    } else if (month == 10 && day == 4 && date > 21 && date < 29) { // Thanksgiving day
+        return false;
+    } else if (month == 10 && day == 5 && date > 22 && date < 30 && hour > 10) {
+        return false; // Early close after Thanksgiving
+    } else if (month == 11 && day == 24 && hour > 10) { // Early close on Xmas eve
+        return false;
+    } else if (month == 11 && day == 25) { // Christmas
+        return false;
+    } else {
+        return true;
+    }
+}
