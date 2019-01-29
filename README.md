@@ -5,6 +5,10 @@ A Node.js web app to manage a virtual stock portfolio and back-test trading algo
 
 This is an on-going project. My long-term goal is to use this to validate strategies and trade real money.
 
+### Snapshot
+
+![sample](https://imgur.com/a/gf1y7tj)
+
 ### Current features:
 
 1) Secure logins and sign-ups using Passport.js
