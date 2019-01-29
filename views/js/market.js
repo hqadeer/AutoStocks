@@ -64,7 +64,7 @@ $(function () {
             } else if (number > 0) {
                 return '+' + base + mode;
             } else {
-                return '-' + base + mode;
+                return base + mode;
             }
         }
     }
