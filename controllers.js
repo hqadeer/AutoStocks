@@ -118,8 +118,7 @@ module.exports.updatePrices = function () {
 
     function update () {
         console.log('updating');
-        db.getConn(function (err, conn) {
-            errorHandle(err);
+        db.getConn().then(conn => {
             conn.query(
                 'SELECT symbol FROM stocks GROUP BY symbol;',
                 function (err, results, fields) {
@@ -142,7 +141,7 @@ module.exports.updatePrices = function () {
                     errorHandle(err);
                 }
             );
-        });
+        }).catch(errorHandle);
     }
     setInterval(update, 5000);
 }
@@ -161,39 +160,35 @@ module.exports.genTable = function(id, callback) {
                 by selling a stock
     */
 
-    db.getConn(function (err, conn) {
-        if (err) {
-            callback(err, null);
-        } else {
-            conn.query(
-                'SELECT s.symbol, s.number, s.price, s.percent, s.price * ' +
-                    's.number as value, '+
-                    'SUM(CASE WHEN h.action = "buy" THEN h.number * h.price '+
-                             'ELSE 0 '+
-                        'END) as investment, '+
-                    'SUM(CASE WHEN h.action = "sell" THEN h.number * h.price '+
-                             'ElSE 0 '+
-                        'END) + s.number * s.price as gains '+
-                'FROM stocks AS s INNER JOIN history AS h '+
-                'ON s.symbol = h.symbol AND s.ID = h.ID '+
-                'WHERE s.ID=? '+
-                'GROUP BY s.symbol, s.number, s.price, s.percent '+
-                'ORDER BY value DESC;',
-                [id],
-                function (err, results, fields) {
-                    conn.release();
-                    if (err) {
-                        callback(err, null);
-                    } else {
-                        callback(null, results);
-                    }
+    db.getConn().then(conn => {
+        conn.query(
+            'SELECT s.symbol, s.number, s.price, s.percent, s.price * ' +
+            's.number as value, ' +
+            'SUM(CASE WHEN h.action = "buy" THEN h.number * h.price ' +
+            'ELSE 0 ' +
+            'END) as investment, ' +
+            'SUM(CASE WHEN h.action = "sell" THEN h.number * h.price ' +
+            'ElSE 0 ' +
+            'END) + s.number * s.price as gains ' +
+            'FROM stocks AS s INNER JOIN history AS h ' +
+            'ON s.symbol = h.symbol AND s.ID = h.ID ' +
+            'WHERE s.ID=? ' +
+            'GROUP BY s.symbol, s.number, s.price, s.percent ' +
+            'ORDER BY value DESC;',
+            [id],
+            function (err, results, fields) {
+                conn.release();
+                if (err) {
+                    callback(err, null);
+                } else {
+                    callback(null, results);
                 }
-            );
-        }
-    });
+            }
+        )
+    }).catch(errorHandle);
 };
 
-function buy (id, symbol, price, number, done) {
+function buy (id, symbol, price, number) {
     /* Purchase stocks right now if market is open; otherwise, queue purchase
        for later.
 
@@ -206,15 +201,18 @@ function buy (id, symbol, price, number, done) {
        failed (boolean) -- true if transaction did not complete (i.e., because
                            of insufficient funds)
     */
-
-    if (isMarketOpen()) {
-        buyNow(id, symbol, price, number, done);
-    } else {
-        queue({ id: id, symbol: symbol, number: number, type: "buy" });
-    }
+    return new Promise((resolve, reject) => {
+        if (isMarketOpen()) {
+            buyNow(id, symbol, price, number).then(result => resolve(result)).catch(
+                err => reject(err));
+        } else {
+            queue({id: id, symbol: symbol, number: number, type: "buy"}).then(
+                result => resolve(result)).catch(err => reject(err));
+        }
+    });
 }
 
-function sell (id, symbol, price, number, done) {
+function sell (id, symbol, price, number) {
     /* Sell stocks right now if market is open; otherwise, queue sale
        for later.
 
@@ -228,11 +226,15 @@ function sell (id, symbol, price, number, done) {
                            of insufficient funds)
     */
 
-    if (isMarketOpen()) {
-        sellNow(id, symbol, price, number, done);
-    } else {
-        queue({ id: id, symbol: symbol, number: number, type: "sell" }, done);
-    }
+    return new Promise((resolve, reject) => {
+        if (isMarketOpen()) {
+            sellNow(id, symbol, price, number).then(result => resolve(result)).catch(
+                err => reject(err));
+        } else {
+            queue({id: id, symbol: symbol, number: number, type: "buy"}).then(
+                result => resolve(result)).catch(err => reject(err));
+        }
+    });
 }
 
 module.exports.processQueue = function (done) {

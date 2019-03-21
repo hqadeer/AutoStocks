@@ -67,18 +67,17 @@ module.exports.init = function initDatabase () {
     console.log('Database connection and initialization successful.');
 }
 
-module.exports.getConn = function(callback) {
+module.exports.getConn = () => new Promise(function (resolve, reject) {
     /* Obtain database connection; run query within callback function
 
-       Callback takes error and connection object as input; either can be null
-       if applicable.
+       Returns a promise; if it resolves, the result is the connection.
     */
 
     pool.getConnection(function (err, conn) {
         if (err) {
-            callback(err, null);
+            reject(err);
         } else {
-            callback(null, conn);
+            resolve(conn);
         }
     });
-};
+});
