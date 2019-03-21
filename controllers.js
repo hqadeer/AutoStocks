@@ -1,7 +1,9 @@
+/* Contains most of the backend code; organization here was probably not ideal */
+
+
 const request = require('request');
 const db = require('./config/db');
 const helpers = require('./config/helpers');
-const isEmpty = helpers.isEmpty;
 const errorHandle = helpers.errorHandle;
 const TRANSACTION_FEE = 4.95; // Transaction fee for all buys and sells.
 
@@ -230,7 +232,15 @@ function sell (id, symbol, price, number, done) {
 }
 
 function queue (purchase, done) {
-
+    db.getConn(function (err, conn) {
+        errorHandle(err);
+        conn.query(
+            'INSERT INTO QUEUE (ID, symbol, number, action)'+
+            'VALUES (?, ?, ?, ?);',
+            Object.values(purchase),
+            errorHandle
+        );
+    });
 }
 
 function buyNow (id, stock, price, shares, buyCallBack) {
