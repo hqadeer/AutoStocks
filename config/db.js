@@ -50,7 +50,8 @@ module.exports.init = function initDatabase () {
             symbol varchar(255), \
             number int, \
             price numeric(16, 2) UNSIGNED, \
-            action varchar(255) \
+            action varchar(255), \
+            transactionID int NOT NULL AUTO_INCREMENT\
         );',
         errorHandle
     );

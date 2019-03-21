@@ -7,11 +7,13 @@ const helpers = require('./config/helpers');
 const errorHandle = helpers.errorHandle;
 const TRANSACTION_FEE = 4.95; // Transaction fee for all buys and sells.
 
+let numInQueue = 0;
+
 module.exports = {
     getCurrentPrice: currentPrice,
     buy: buy,
     sell: sell
-}
+};
 
 let apiKey = 'F24C5SOKOYQUBV6K'; // Key for AlphaVantage
 
@@ -45,7 +47,7 @@ function getData(symbol, options, callback) {
 
     function getURL () {
         var URL;
-        let base = 'https://www.alphavantage.co/query?function='
+        let base = 'https://www.alphavantage.co/query?function=';
         if (options.mode === 'intra') {
             URL = base + `${func}&symbol=${symbol}&interval=${options.time}&`+
                          `outputsize=${options.size}&apikey=${apiKey}`;
@@ -72,38 +74,40 @@ function getData(symbol, options, callback) {
     getURL(inner);
 }
 
-function currentPrice(symbols, priceCallBack) {
+function currentPrice (symbols) {
     /* Obtain the current price and daily price change of one or more stocks.
-       Returns an object with the symbols as keys and a two-item array of
-       current price and price change as values
 
-       symbols -- list of one or more stock symbols
+       @param symbols -- list of one or more stock symbols
+       Returns a promise with result as aj object with the symbols as keys and a
+       two-item array of current price and price change as values
     */
-
-    symbolUrl = symbols[0]
-    for (var symbol of symbols.slice(1)) {
-        symbolUrl += `,${symbol}`
-    }
-    let Url = `https://api.iextrading.com/1.0/stock/market/batch?symbols`+
-              `=${symbolUrl}&types=quote&filter=latestPrice,changePercent`
-    request(Url, function(err, response, body) {
-        errorHandle(err);
-        let info = JSON.parse(body);
-        let acceptedSymbols = Object.keys(info);
-        if (acceptedSymbols.length < symbols.length) {
-            wrongSymbols = []
-            for (var symbol of symbols) {
-                if (!acceptedSymbols.includes(symbol.toUpperCase())) {
-                    wrongSymbols.push(symbol);
-                }
-            }
-            priceCallBack(new Error('Invalid symbol(s): ' + wrongSymbols),
-                          null);
-        } else {
-            let vals = acceptedSymbols.map(key => [info[key].quote.latestPrice,
-                                           info[key].quote.changePercent]);
-            priceCallBack(null, vals);
+    return new Promise(function (resolve, reject) {
+        let symbolUrl = symbols[0];
+        for (let symbol of symbols.slice(1)) {
+            symbolUrl += `,${symbol}`
         }
+        let Url = `https://api.iextrading.com/1.0/stock/market/batch?symbols`+
+            `=${symbolUrl}&types=quote&filter=latestPrice,changePercent`;
+        request(Url, function(err, response, body) {
+            if (err) {
+                reject(err);
+            }
+            let info = JSON.parse(body);
+            let acceptedSymbols = Object.keys(info);
+            if (acceptedSymbols.length < symbols.length) {
+                let wrongSymbols = [];
+                for (let symbol of symbols) {
+                    if (!acceptedSymbols.includes(symbol.toUpperCase())) {
+                        wrongSymbols.push(symbol);
+                    }
+                }
+                reject(new Error('Invalid symbol(s): ' + wrongSymbols));
+            } else {
+                let vals = acceptedSymbols.map(key => [info[key].quote.latestPrice,
+                           info[key].quote.changePercent]);
+                resolve(vals);
+            }
+        });
     });
 }
 
@@ -113,7 +117,7 @@ module.exports.updatePrices = function () {
     */
 
     function update () {
-        console.log('updating')
+        console.log('updating');
         db.getConn(function (err, conn) {
             errorHandle(err);
             conn.query(
@@ -140,7 +144,7 @@ module.exports.updatePrices = function () {
             );
         });
     }
-    setInterval(update, 5000)
+    setInterval(update, 5000);
 }
 
 module.exports.genTable = function(id, callback) {
@@ -187,7 +191,7 @@ module.exports.genTable = function(id, callback) {
             );
         }
     });
-}
+};
 
 function buy (id, symbol, price, number, done) {
     /* Purchase stocks right now if market is open; otherwise, queue purchase
@@ -231,14 +235,81 @@ function sell (id, symbol, price, number, done) {
     }
 }
 
-function queue (purchase, done) {
+module.exports.processQueue = function (done) {
+    if (!isMarketOpen()) {
+        done();
+    } else {
+        db.getConn(function (err, conn) {
+            errorHandle(err);
+            conn.query(
+                'SELECT * FROM queue',
+                (error, results, fields) => {
+                    errorHandle(error, results, fields);
+                    doBuySells(results, done);
+                }
+            )
+        })
+    }
+};
+
+function doBuySells (purchases) {
+    /* Takes all purchases from queue and executes them.
+
+       Done takes 2 parameters:
+       errorMessages -- array of messages returned from all failed transactions
+       balance -- new account balance after everything on queue is processed
+    */
+
+    let errorMessages = [];
+    let finalBalance;
+    function resultHandler(err, message, balance, failed, i) {
+        /* Function to process the output of an individual call to buy/sell */
+        if (err) {
+            throw err;
+        }
+        if (failed) {
+            errorMessages.push(i + ". " + message);
+        } else {
+            finalBalance = balance;
+        }
+    }
+    for (let row of purchases) {
+        currentPrice(row.symbol, function (err, prices) {
+            if (err) {
+                throw err;
+            }
+            let action;
+            if (row.action === "sell") {
+                action = sellNow;
+            } else {
+                action = buyNow;
+            }
+            action(row.id, row.symbol, prices[0][0], row.number,
+                (err, message, balance, failed) => {
+                    resultHandler(err, message, balance, failed, row.transactionId % 1000);
+                }
+            );
+        });
+    }
+
+}
+
+function queue (purchase) {
+    /* Log future purchase into database; throw error if any */
+    if (numInQueue >= 1000) {
+        return;
+    }
     db.getConn(function (err, conn) {
         errorHandle(err);
         conn.query(
             'INSERT INTO QUEUE (ID, symbol, number, action)'+
             'VALUES (?, ?, ?, ?);',
             Object.values(purchase),
-            errorHandle
+            (error, results, fields) => {
+                conn.release();
+                numInQueue++;
+                errorHandle(error, results, fields);
+            }
         );
     });
 }
@@ -315,7 +386,7 @@ function buyNow (id, stock, price, shares, buyCallBack) {
                                 );
                             }
                             let msg = `Purchased ${shares} shares of `+
-                                      `${stock.toUpperCase()} @ $${price}.`
+                                      `${stock.toUpperCase()} @ $${price}.`;
                             buyCallBack(null, msg, balance - price * shares);
                         }
                     );
@@ -350,7 +421,7 @@ function sellNow (id, symbol, price, number, sellCallBack) {
 
     console.log('selling');
     db.getConn(function (err, conn) {
-        errorHandle(err)
+        errorHandle(err);
         conn.query(
             'SELECT number FROM stocks WHERE ID=? AND symbol=?;',
             [id, symbol],
