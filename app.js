@@ -112,40 +112,21 @@ app.get('/logout', function (req, res){
 
 app.post('/buy', isAuth, function (req, res, next) {
     console.log('buy');
-    let price = parseFloat(req.body.price, 10);
     let number = parseFloat(req.body.number, 10);
-    backend.buy(req.user.id, req.body.symbol, price, number,
-        function (err, msg, balance, failed) {
-            if (err) {
-                next(err);
-            }
-            res.json({ message: msg, balance: balance, failed: failed });
-        }
-    );
+    backend.buy(req.user.id, req.body.symbol, number).then(result => {
+        res.json(result) }).catch(err => next(err));
 });
 
 app.post('/sell', isAuth, function (req, res, next) {
     console.log('sell');
-    let price = parseFloat(req.body.price, 10);
     let number = parseFloat(req.body.number, 10);
-    backend.sell(req.user.id, req.body.symbol, price, number,
-        function (err, msg, balance, failed) {
-            if (err) {
-                next(err);
-            }
-            res.json({ message: msg, balance: balance, failed: failed });
-        }
-    );
+    backend.sell(req.user.id, req.body.symbol, number).then(result => {
+        res.json(result) }).catch(err => next(err));
 });
 
 app.post('/table', isAuth, function (req, res, next) {
     console.log('table');
-    backend.genTable(req.user.id, function (err, results) {
-        if (err) {
-            next(err);
-        }
-        res.json(results);
-    });
+    backend.genTable(req.user.id).then(results => res.json(results)).catch(err => next(err));
 });
 
 app.get('/', isAuth, function (req, res, next) {

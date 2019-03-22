@@ -146,7 +146,7 @@ module.exports.updatePrices = function () {
     setInterval(update, 5000);
 };
 
-module.exports.genTable = function(id, callback) {
+module.exports.genTable = function(id) {
     /* Queries history and stock tables of database to return data for display
        table on website.
 
@@ -160,32 +160,33 @@ module.exports.genTable = function(id, callback) {
                 by selling a stock
     */
 
-    db.getConn().then(conn => {
-        conn.query(
-            'SELECT s.symbol, s.number, s.price, s.percent, s.price * ' +
-            's.number as value, ' +
-            'SUM(CASE WHEN h.action = "buy" THEN h.number * h.price ' +
-            'ELSE 0 ' +
-            'END) as investment, ' +
-            'SUM(CASE WHEN h.action = "sell" THEN h.number * h.price ' +
-            'ElSE 0 ' +
-            'END) + s.number * s.price as gains ' +
-            'FROM stocks AS s INNER JOIN history AS h ' +
-            'ON s.symbol = h.symbol AND s.ID = h.ID ' +
-            'WHERE s.ID=? ' +
-            'GROUP BY s.symbol, s.number, s.price, s.percent ' +
-            'ORDER BY value DESC;',
-            [id],
-            function (err, results, fields) {
-                conn.release();
-                if (err) {
-                    callback(err, null);
-                } else {
-                    callback(null, results);
+    return new Promise((resolve, reject) => {
+        db.getConn().then(conn => {
+            conn.query(
+                'SELECT s.symbol, s.number, s.price, s.percent, s.price * ' +
+                's.number as value, ' +
+                'SUM(CASE WHEN h.action = "buy" THEN h.number * h.price ' +
+                'ELSE 0 ' +
+                'END) as investment, ' +
+                'SUM(CASE WHEN h.action = "sell" THEN h.number * h.price ' +
+                'ElSE 0 ' +
+                'END) + s.number * s.price as gains ' +
+                'FROM stocks AS s INNER JOIN history AS h ' +
+                'ON s.symbol = h.symbol AND s.ID = h.ID ' +
+                'WHERE s.ID=? ' +
+                'GROUP BY s.symbol, s.number, s.price, s.percent ' +
+                'ORDER BY value DESC;',
+                [id],
+                function (err, results) {
+                    conn.release();
+                    if (err) {
+                        reject(err);
+                    }
+                    resolve(results);
                 }
-            }
-        )
-    }).catch(errorHandle);
+            )
+        }).catch(err => reject(err));
+    });
 };
 
 function buy (id, symbol, number) {
