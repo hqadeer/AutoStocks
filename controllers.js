@@ -188,7 +188,7 @@ module.exports.genTable = function(id, callback) {
     }).catch(errorHandle);
 };
 
-function buy (id, symbol, price, number) {
+function buy (id, symbol, number) {
     /* Purchase stocks right now if market is open; otherwise, queue purchase
        for later.
 
@@ -203,7 +203,9 @@ function buy (id, symbol, price, number) {
     */
     return new Promise((resolve, reject) => {
         if (isMarketOpen()) {
-            buyNow(id, symbol, price, number).then(result => resolve(result)).catch(
+            currentPrice([symbol]).then(result => {
+                return buyNow(id, symbol, result[id][0], number)
+            }).then(result => resolve(result)).catch(
                 err => reject(err));
         } else {
             queue({id: id, symbol: symbol, number: number, type: "buy"}).then(
@@ -212,7 +214,7 @@ function buy (id, symbol, price, number) {
     });
 }
 
-function sell (id, symbol, price, number) {
+function sell (id, symbol, number) {
     /* Sell stocks right now if market is open; otherwise, queue sale
        for later.
 
@@ -228,7 +230,9 @@ function sell (id, symbol, price, number) {
 
     return new Promise((resolve, reject) => {
         if (isMarketOpen()) {
-            sellNow(id, symbol, price, number).then(result => resolve(result)).catch(
+            currentPrice([symbol]).then(result => {
+                return sellNow(id, symbol, result[id][0], number)
+            }).then(result => resolve(result)).catch(
                 err => reject(err));
         } else {
             queue({id: id, symbol: symbol, number: number, type: "buy"}).then(
