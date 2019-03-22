@@ -121,7 +121,7 @@ module.exports.updatePrices = function () {
         db.getConn().then(conn => {
             conn.query(
                 'SELECT symbol FROM stocks GROUP BY symbol;',
-                function (err, results, fields) {
+                function (err, results) {
                     let symbols = results.map(row => row.symbol);
                     currentPrice(symbols, function (err, prices) {
                         if (err) {
@@ -144,7 +144,7 @@ module.exports.updatePrices = function () {
         }).catch(errorHandle);
     }
     setInterval(update, 5000);
-}
+};
 
 module.exports.genTable = function(id, callback) {
     /* Queries history and stock tables of database to return data for display
@@ -237,21 +237,25 @@ function sell (id, symbol, price, number) {
     });
 }
 
-module.exports.processQueue = function (done) {
-    if (!isMarketOpen()) {
-        done();
-    } else {
-        db.getConn(function (err, conn) {
-            errorHandle(err);
-            conn.query(
-                'SELECT * FROM queue',
-                (error, results, fields) => {
-                    errorHandle(error, results, fields);
-                    doBuySells(results, done);
-                }
-            )
-        })
-    }
+module.exports.processQueue = () => {
+    return new Promise((resolve, reject) => {
+        if (!isMarketOpen()) {
+            resolve(null);
+        } else {
+            db.getConn().then(conn => {
+                conn.query(
+                    'SELECT * FROM queue',
+                    (error, results) => {
+                        if (error) {
+                            throw error;
+                        }
+                        doBuySells(results).then(messages => resolve(messages))
+                            .catch(err => reject(err))
+                    }
+                );
+            }).catch(err => reject(err));
+        }
+    });
 };
 
 function doBuySells (purchases) {
@@ -262,46 +266,50 @@ function doBuySells (purchases) {
        balance -- new account balance after everything on queue is processed
     */
 
-    let errorMessages = [];
-    let finalBalance;
-    function resultHandler(err, message, balance, failed, i) {
-        /* Function to process the output of an individual call to buy/sell */
-        if (err) {
-            throw err;
-        }
-        if (failed) {
-            errorMessages.push(i + ". " + message);
-        } else {
-            finalBalance = balance;
-        }
-    }
-    for (let row of purchases) {
-        currentPrice(row.symbol, function (err, prices) {
-            if (err) {
-                throw err;
-            }
-            let action;
-            if (row.action === "sell") {
-                action = sellNow;
+    let promises = [];
+    let messages = [];
+    let finalBalance = null;
+
+    function rowHandler (row) {
+        return new Promise((resolve, reject) => {
+            let method;
+            if (row.action === "buy") {
+                method = buyNow;
             } else {
-                action = buyNow;
+                method = sellNow;
             }
-            action(row.id, row.symbol, prices[0][0], row.number,
-                (err, message, balance, failed) => {
-                    resultHandler(err, message, balance, failed, row.transactionId % 1000);
+            currentPrice([row.ID]).then(result => {
+                return method(result[row.ID][0]);
+            }).then(result => {
+                messages.push(result.message);
+                if (result.balance) {
+                    finalBalance = result.balance;
+                    numInQueue--;
                 }
-            );
+                resolve(result.message);
+            }).catch(err => reject(err));
         });
     }
+
+    for (let row of purchases) {
+        promises.push(rowHandler(row));
+    }
+
+    return new Promise((resolve, reject) => {
+        Promise.all(promises).then(() => resolve(messages)).catch(err => {
+            reject(err);
+        });
+    });
 
 }
 
 function queue (purchase) {
     /* Log future purchase into database; throw error if any */
+
     if (numInQueue >= 1000) {
         return;
     }
-    db.getConn(function (err, conn) {
+    db.getConn().then(conn => {
         errorHandle(err);
         conn.query(
             'INSERT INTO QUEUE (ID, symbol, number, action)'+
@@ -310,13 +318,13 @@ function queue (purchase) {
             (error, results, fields) => {
                 conn.release();
                 numInQueue++;
-                errorHandle(error, results, fields);
+                errorHandle();
             }
         );
-    });
+    }).catch(errorHandle);
 }
 
-function buyNow (id, stock, price, shares, buyCallBack) {
+function buyNow (id, stock, price, shares) {
     /* Buy a stock for a particular user now
 
        id -- username of purchaser
@@ -335,71 +343,74 @@ function buyNow (id, stock, price, shares, buyCallBack) {
                            of insufficient funds)
     */
 
-    db.getConn(function (err, conn) {
-        errorHandle(err);
-        conn.query(
-            'SELECT balance FROM users WHERE id = ?;',
-            [id],
-            function (error, results, fields) {
-                let balance = results[0].balance;
-                if (shares <= 0) {
-                    buyCallBack(null, 'Input must be a positive integer!',
-                                null, true);
-                }
-                if ((price * shares) > balance) {
-                    buyCallBack(null, 'Insufficient funds.', null, true);
-                } else {
-                    conn.query(
-                        'UPDATE users \
-                        SET balance = balance - ? \
-                        WHERE id = ?;',
-                        [price * shares, id],
-                        errorHandle
-                    );
-                    conn.query(
-                        'INSERT INTO history VALUES ( \
-                            ?, ?, ?, ?, "buy");',
-                        [id, stock, shares, price],
-                        errorHandle
-                    );
-                    conn.query(
-                        'SELECT * FROM stocks \
-                        WHERE ID=? AND symbol=?;',
-                        [id, stock],
-                        function (error, results, fields) {
-                            if (error) {
-                                console.log(error)
+    return new Promise((resolve, reject) => {
+        db.getConn().then(conn => {
+            conn.query(
+                'SELECT balance FROM users WHERE id = ?;',
+                [id],
+                function (error, results) {
+                    if (error) {
+                        reject(error);
+                    }
+                    let balance = results[0].balance;
+                    if (shares <= 0) {
+                        resolve({message: 'Input must be a positive integer!'});
+                    }
+                    if ((price * shares) > balance) {
+                        resolve({message: 'Insufficient funds.'});
+                    } else {
+                        conn.query(
+                            'UPDATE users \
+                            SET balance = balance - ? \
+                            WHERE id = ?;',
+                            [price * shares, id],
+                            error => reject(error)
+                        );
+                        conn.query(
+                            'INSERT INTO history VALUES ( \
+                                ?, ?, ?, ?, "buy");',
+                            [id, stock, shares, price],
+                            error => reject(error)
+                        );
+                        conn.query(
+                            'SELECT * FROM stocks \
+                            WHERE ID=? AND symbol=?;',
+                            [id, stock],
+                            function (error, results) {
+                                if (error) {
+                                    reject(error);
+                                }
+                                if (results.length > 0) {
+                                    conn.query(
+                                        'UPDATE stocks \
+                                        SET number = number + ? \
+                                        WHERE ID=? AND symbol=?;',
+                                        [shares, id, stock],
+                                        error => reject(error)
+                                    );
+                                } else {
+                                    conn.query(
+                                        'INSERT INTO stocks VALUES( \
+                                            ?, ?, ?, ?, 0 \
+                                        );',
+                                        [id, stock, shares, price],
+                                        error => reject(error)
+                                    );
+                                }
+                                let msg = `Purchased ${shares} shares of ` +
+                                    `${stock.toUpperCase()} @ $${price}.`;
+                                resolve({
+                                    message: msg, balance: balance - price * shares,
+                                    success: true
+                                });
                             }
-                            if (results.length > 0) {
-                                conn.query(
-                                    'UPDATE stocks \
-                                    SET number = number + ? \
-                                    WHERE ID=? AND symbol=?;',
-                                    [shares, id, stock],
-                                    errorHandle
-                                );
-                            } else {
-                                conn.query(
-                                    'INSERT INTO stocks VALUES( \
-                                        ?, ?, ?, ?, 0 \
-                                    );',
-                                    [id, stock, shares, price],
-                                    errorHandle
-                                );
-                            }
-                            let msg = `Purchased ${shares} shares of `+
-                                      `${stock.toUpperCase()} @ $${price}.`;
-                            buyCallBack(null, msg, balance - price * shares);
-                        }
-                    );
+                        );
+                    }
+                    conn.release();
                 }
-                conn.release();
-                if (error) {
-                    buyCallBack(error, null)
-                }
-            }
-        );
-    });
+            );
+        }).catch(err => reject(err));
+    })
 }
 
 function sellNow (id, symbol, price, number, sellCallBack) {
@@ -421,66 +432,64 @@ function sellNow (id, symbol, price, number, sellCallBack) {
                            of insufficient funds)
     */
 
-    console.log('selling');
-    db.getConn(function (err, conn) {
-        errorHandle(err);
+    return new Promise((resolve, reject) => {
+        db.getConn().then(conn => {
         conn.query(
             'SELECT number FROM stocks WHERE ID=? AND symbol=?;',
             [id, symbol],
-            function (error, results, fields) {
+            function (error, results) {
                 conn.query('SELECT balance FROM users WHERE ID=?;', [id],
-                function (e, r, f) {
-                    errorHandle(e);
-                    let bal = r[0].balance;
-                    if (number <= 0) {
-                        sellCallBack(null, 'Input must be a positive integer!',
-                                     null, true);
-                    } else if (results.length === 0) {
-                        sellCallBack(null, 'You do not own any shares of '+
-                                           symbol.toUpperCase() +'!',
-                                     null, true);
-                    } else if (results[0].number < number) {
-                        sellCallBack(null, 'Insufficient shares.', null, true);
-                    } else {
-                        conn.query(
-                            'UPDATE users \
-                            SET balance = balance + ? \
-                            WHERE id = ?;',
-                            [price * number, id],
-                            errorHandle
-                        );
-                        conn.query(
-                            'INSERT INTO history VALUES ( \
-                                ?, ?, ?, ?, "sell");',
-                            [id, symbol, number, price],
-                            errorHandle
-                        );
-                        if (results[0].number > number) {
+                    function (e, r, f) {
+                        if (e) { reject(e); }
+                        let bal = r[0].balance;
+                        if (number <= 0) {
+                            resolve({ message: 'Input must be a positive integer!' });
+                        } else if (results.length === 0) {
+                            resolve({ message: 'You do not own any shares of '+
+                                symbol.toUpperCase() +'!' });
+                        } else if (results[0].number < number) {
+                            resolve({ message: 'Insufficient shares.'});
+                        } else {
                             conn.query(
-                                'UPDATE stocks \
-                                SET number = number - ? \
-                                WHERE ID=? AND symbol=?;',
-                                [number, id, symbol],
-                                errorHandle
+                                'UPDATE users \
+                                SET balance = balance + ? \
+                                WHERE id = ?;',
+                                [price * number, id],
+                                err => reject(err)
                             );
-                        } else if (results[0].number === number) {
                             conn.query(
-                                'DELETE FROM stocks WHERE ID=? AND symbol=?;',
-                                [id, symbol],
-                                errorHandle
+                                'INSERT INTO history VALUES ( \
+                                    ?, ?, ?, ?, "sell");',
+                                [id, symbol, number, price],
+                                err => reject(err)
                             );
+                            if (results[0].number > number) {
+                                conn.query(
+                                    'UPDATE stocks \
+                                    SET number = number - ? \
+                                    WHERE ID=? AND symbol=?;',
+                                    [number, id, symbol],
+                                    err => reject(err)
+                                );
+                            } else if (results[0].number === number) {
+                                conn.query(
+                                    'DELETE FROM stocks WHERE ID=? AND symbol=?;',
+                                    [id, symbol],
+                                    err => reject(err)
+                                );
+                            }
+                            let msg = `Sold ${number} shares of `+
+                                `${symbol.toUpperCase()} @ $${price}.`;
+                            resolve({ message: msg, balance: bal + price * number, success: true });
                         }
-                        let msg = `Sold ${number} shares of `+
-                                  `${symbol.toUpperCase()} @ $${price}.`;
-                        sellCallBack(null, msg, bal + price * number);
-                    }
-                });
+                    });
                 conn.release();
                 if (error) {
-                    sellCallBack(error, null)
+                    reject(error);
                 }
             }
         );
+        }).catch(err => reject(error));
     });
 }
 

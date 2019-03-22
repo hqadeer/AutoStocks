@@ -1,12 +1,12 @@
-module.exports.errorHandle = function errorHandle (error, results, fields) {
+module.exports.errorHandle = function errorHandle (error) {
     if (error) {
         throw error;
     }
-}
+};
 
 module.exports.isEmpty = function isEmpty (obj) {
-    for (var i in obj) {
+    for (let _ in obj) {
         return false;
     }
     return true;
-}
+};
