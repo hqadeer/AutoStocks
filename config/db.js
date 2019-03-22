@@ -51,7 +51,8 @@ module.exports.init = function initDatabase () {
             number int, \
             price numeric(16, 2) UNSIGNED, \
             action varchar(255), \
-            transactionID int NOT NULL AUTO_INCREMENT\
+            transactionID int NOT NULL AUTO_INCREMENT, \
+            PRIMARY KEY (transactionID) \
         );',
         errorHandle
     );

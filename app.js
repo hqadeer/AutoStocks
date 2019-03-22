@@ -131,22 +131,19 @@ app.post('/table', isAuth, function (req, res, next) {
 
 app.get('/', isAuth, function (req, res, next) {
     console.log('home');
-    db.getConn(function (err, conn) {
-        if (err) {
-            next(err);
-        }
+    db.getConn().then(conn => {
         conn.query(
             'SELECT balance FROM users WHERE ID=?', [req.user.id],
-            function (err, results, fields) {
+            function (err, results) {
                 conn.release();
                 if (err) {
                     next(err);
                 }
                 res.render('main.pug',
-                           { balance: results[0].balance.toFixed(2) });
+                    { balance: results[0].balance.toFixed(2) });
             }
         );
-    });
+    }).catch(err => next(err));
 });
 
 // Initialize app

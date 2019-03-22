@@ -21,7 +21,7 @@ class User {
     }
 }
 
-module.exports.register = function (username, password, regCallback) {
+module.exports.register = function (username, password) {
     /* Takes username and password (and callback function) as input; registers
        user.
 
@@ -29,78 +29,76 @@ module.exports.register = function (username, password, regCallback) {
        not applicable.
     */
 
-    function hash (password, hashCallback) {
+    function hash (password) {
         // Helper function to generate a salt and hash a password
-
-        let salt = crypto.randomBytes(16).toString('hex');
-        let hash =
-        crypto.pbkdf2Sync(password, salt, 10000, 512, 'sha512').toString('hex');
-        hashCallback(username, salt, hash)
+        return new Promise((resolve, reject) => {
+            try {
+                let salt = crypto.randomBytes(16).toString('hex');
+                let hash = crypto.pbkdf2Sync(password, salt, 10000, 512,
+                    'sha512').toString('hex');
+            } catch (err) {
+                reject(err);
+            }
+            resolve({ ID: username, salt: salt, hash: hash });
+        });
     }
 
-    db.getConn(function (err, conn) {
-        if (err) {
-            throw err;
-        }
-        conn.query(
-            'SELECT * FROM users WHERE ID=?', [username],
-            function (error, results, fields) {
-                if (results.length > 0) {
-                    regCallback(null, null);
-                } else {
-                    hash (password, function (username, salt, hash) {
+    return new Promise((resolve, reject) => {
+        db.getConn().then(conn => {
+            conn.query(
+                'SELECT * FROM users WHERE ID=?', [username],
+                function (error, results) {
+                    if (results.length > 0) {
+                        resolve(null);
+                    } else {
+                        hash(password).then(user => {
                         conn.query(
-                            'INSERT INTO users (ID, salt, hash)'+
+                            'INSERT INTO users (ID, salt, hash)' +
                             'VALUES (?, ?, ?);',
-                            [username, salt, hash],
+                            Object.values(user),
                             function (error, results, fields) {
                                 if (error) {
-                                    regCallback(error)
+                                    reject(error)
                                 } else {
-                                    let info = {
-                                        ID: username,
-                                        salt: salt,
-                                        hash: hash
-                                    }
-                                    regCallback(null, new User(info));
+                                    resolve(new User(user));
                                 }
                             }
                         );
-                    });
+                        }).catch(err => reject(err));
+                    }
+                    conn.release();
+                    if (error) {
+                        reject(error);
+                    }
                 }
-                conn.release();
-                if (error) {
-                    throw err;
-                }
-            }
-        );
+            );
+        });
     });
 }
 
-module.exports.findUser = function (username, findCallback) {
+module.exports.findUser = function (username) {
     /* Find user with given username and call callback function on corresponding
        user object.
 
        findCallback takes error and User object as input. Either could be null
        if applicable.
     */
-    
-    db.getConn(function (err, conn) {
-        if (err) {
-            throw err;
-        }
+    return new Promise((resolve, reject) => {
+        db.getConn().then(conn => {
         conn.query(
             'SELECT ID, salt, hash FROM users WHERE ID=?', [username],
-            function (error, results, fields) {
+            function (error, results) {
                 conn.release();
                 if (error) {
-                    findCallback(error, null);
+                    reject(error);
                 } else if (results.length === 0) {
-                    findCallback(null, null);
+                    resolve(null);
                 } else {
-                    findCallback(null, new User(results[0]));
+                    resolve(new User(results[0]));
                 }
             }
         );
-    });
+        });
+    })
+
 }

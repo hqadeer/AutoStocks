@@ -291,7 +291,7 @@ function doBuySells (purchases) {
                     finalBalance = result.balance;
                     numInQueue--;
                 }
-                resolve(result.message);
+                resolve(result.transactionID + ". " + result.message);
             }).catch(err => reject(err));
         });
     }
