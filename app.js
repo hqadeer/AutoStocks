@@ -29,10 +29,8 @@ app.set("views", path.join(__dirname, "views"))
 passport.use('local-login', new LocalStrategy(
     { passReqToCallback: true },
     function (req, username, password, passBack) {
-        User.findUser(username, function (err, user) {
-            if (err) {
-                return passBack(err);
-            } else if (!user) {
+        User.findUser(username).then(user => {
+            if (!user) {
                 return passBack(null, false, req.flash('authMessage',
                                                        'Invalid username.'));
             } else if (!user.verify(password)) {
@@ -43,24 +41,21 @@ passport.use('local-login', new LocalStrategy(
             } else {
                 return passBack(null, user);
             }
-        });
+        }).catch(err => passBack(err));
     }
 ));
 
 passport.use('local-signup', new LocalStrategy(
     { passReqToCallback: true },
     function (req, username, password, done) {
-        User.register(username, password, function (err, user) {
-            if (err) {
-                return done(err);
-            } else if (!user) {
+        User.register(username, password).then(user => {
+            if (!user) {
                 return done(null, false, req.flash('authMessage',
-                                                   'Username is taken.')
-                );
+                                                   'Username is taken.'));
             } else {
                 return done(null, user);
             }
-        })
+        }).catch(err => done(err));
     }
 ));
 
