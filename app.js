@@ -1,15 +1,15 @@
 // Dependencies
-const backend = require('./controllers')
-const db = require('./config/db')
-const User = require('./models/User')
-const path = require('path')
-const express = require('express')
-const bodyParser = require('body-parser')
+const backend = require('./controllers');
+const db = require('./config/db');
+const User = require('./models/User');
+const path = require('path');
+const express = require('express');
+const bodyParser = require('body-parser');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const session = require('express-session');
-const flash = require('connect-flash')
-const app = express()
+const flash = require('connect-flash');
+const app = express();
 
 // Configuration, some code borrowed from Passport docs
 app.use(express.static('views'));
@@ -29,7 +29,8 @@ app.set("views", path.join(__dirname, "views"))
 passport.use('local-login', new LocalStrategy(
     { passReqToCallback: true },
     function (req, username, password, passBack) {
-        User.findUser(username).then(user => {
+        User.findUser(username)
+        .then(user => {
             if (!user) {
                 return passBack(null, false, req.flash('authMessage',
                                                        'Invalid username.'));
@@ -41,21 +42,24 @@ passport.use('local-login', new LocalStrategy(
             } else {
                 return passBack(null, user);
             }
-        }).catch(err => passBack(err));
+        })
+        .catch(err => passBack(err));
     }
 ));
 
 passport.use('local-signup', new LocalStrategy(
     { passReqToCallback: true },
     function (req, username, password, done) {
-        User.register(username, password).then(user => {
+        User.register(username, password)
+        .then(user => {
             if (!user) {
                 return done(null, false, req.flash('authMessage',
                                                    'Username is taken.'));
             } else {
                 return done(null, user);
             }
-        }).catch(err => done(err));
+        })
+        .catch(err => done(err));
     }
 ));
 
