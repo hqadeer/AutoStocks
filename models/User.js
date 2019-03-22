@@ -36,10 +36,10 @@ module.exports.register = function (username, password) {
                 let salt = crypto.randomBytes(16).toString('hex');
                 let hash = crypto.pbkdf2Sync(password, salt, 10000, 512,
                     'sha512').toString('hex');
+                resolve({ ID: username, salt: salt, hash: hash });
             } catch (err) {
                 reject(err);
             }
-            resolve({ ID: username, salt: salt, hash: hash });
         });
     }
 
