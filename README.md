@@ -27,20 +27,3 @@ This is an on-going project. My long-term goal is to use this to validate strate
 
 8) Improved ROI and investment indicators.
 
-### In-Progress:
-
-1) Backtesting strategies
-
-2) Improvements to make app more realistic; queue purchases made outside market hours, latency, etc.
-
-### To-do:
-
-1) Testing suite.
-
-2) Security improvements (tbd)
-
-3) Experimentation with algorithms
-
-4) (medium-term) Host app remotely
-
-5) (long-term) Incorporate financial authorization and trade real money
